@@ -18,7 +18,6 @@ import heroImage from "../assets/running.jpg"
         position: "relative",
       }}
     >
-      {/* Optional dark overlay */}
       <Box
         sx={{
           position: "absolute",
@@ -27,7 +26,7 @@ import heroImage from "../assets/running.jpg"
         }}
       />
 
-      {/* Content */}
+ 
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <Typography variant="h2" component="h1" gutterBottom>
           Crowd-Sourced Racing Events
