@@ -1,0 +1,12 @@
+### Test POST user
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "username": "PostTest",
+  "email": "post-test@example.com",
+  "passwordHash": "add-a-real-hash-here"
+}
+
+### Test GET users
+GET http://localhost:8080/users
