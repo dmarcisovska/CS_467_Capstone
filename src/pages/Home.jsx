@@ -1,4 +1,5 @@
 import { Box, Typography, Button } from "@mui/material";
+import { Link } from 'react-router-dom'; 
 import heroImage from "../assets/running.jpg"
 
  function Home() {
@@ -34,7 +35,8 @@ import heroImage from "../assets/running.jpg"
         <Typography variant="h6" sx={{ mb: 3 }}>
           Join local running events, connect with the community, and race for fun!
         </Typography>
-        <Button variant="contained" color="primary" size="large">
+        <Button variant="contained" color="primary" size="large" component={Link}
+          to='/events' >
           Explore Events
         </Button>
       </Box>
