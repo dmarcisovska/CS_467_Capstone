@@ -42,7 +42,7 @@ const Login = () => {
           variant="h2"
           sx={{ mb: 3, fontWeight: 'bold', color: 'white' }}
         >
-          Log In
+          Log in
         </Typography>
 
         <TextField
