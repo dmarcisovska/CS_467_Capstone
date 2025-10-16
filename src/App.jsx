@@ -1,21 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
+import { Routes, Route } from 'react-router-dom';
 import './App.css'
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import ResponsiveAppBar from './components/Nav';
-import Home from "./pages/Home"
+import Home from './pages/Home'
+import Events from './pages/Events';
+import Create from './pages/Create';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
+    
     <ResponsiveAppBar/>
-    <Home/>
+     <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/events' element={<Events />} />
+        <Route path='/create' element={<Create />} />
+      </Routes>
     </>
   )
 }
