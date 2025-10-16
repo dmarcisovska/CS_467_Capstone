@@ -68,7 +68,7 @@ const Login = () => {
         />
 
         <Button variant="contained" color="primary" fullWidth size="large">
-          Login
+          Log in
         </Button>
       </Box>
     </Box>
