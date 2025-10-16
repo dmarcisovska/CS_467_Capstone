@@ -13,6 +13,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { NavLink } from 'react-router-dom';
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -20,7 +21,7 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 const pages = [
   { text: 'Home', to: '/' },
   { text: 'Events', to: '/events' },
-  { text: 'Create Event', to: '/create' }
+  { text: 'Create Event', to: '/create' },
 ];
 
 function ResponsiveAppBar() {
@@ -44,19 +45,29 @@ function ResponsiveAppBar() {
   const linkStyle = ({ isActive }) => ({
     textDecoration: 'none',
     color: 'inherit',
-    fontWeight: isActive ? 700 : 500
+    fontWeight: isActive ? 700 : 500,
   });
 
   return (
-    <AppBar position='static'>
-      <Container maxWidth='xl'>
+    <AppBar position="static">
+      <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          <IconButton
+            component={NavLink}
+            to="/"
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              mr: 1,
+              color: 'inherit',
+            }}
+          >
+            <DirectionsRunIcon />
+          </IconButton>
           <Typography
             variant="h6"
             noWrap
             component={NavLink}
-            to='/'
+            to="/"
             style={linkStyle}
             sx={{
               mr: 2,
@@ -67,24 +78,22 @@ function ResponsiveAppBar() {
               color: 'inherit',
               textDecoration: 'none',
             }}
-          >
-            LOGO
-          </Typography>
+          ></Typography>
 
           {/* Mobile menu button */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
-              size='large'
-              aria-label='open navigation'
-              aria-controls='menu-appbar'
-              aria-haspopup='true'
+              size="large"
+              aria-label="open navigation"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color='inherit'
+              color="inherit"
             >
               <MenuIcon />
             </IconButton>
             <Menu
-              id='menu-appbar'
+              id="menu-appbar"
               anchorEl={anchorElNav}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
               keepMounted
@@ -112,10 +121,10 @@ function ResponsiveAppBar() {
           {/* Mobile logo */}
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
-            variant='h5'
+            variant="h5"
             noWrap
             component={NavLink}
-            to='/'
+            to="/"
             style={linkStyle}
             sx={{
               mr: 2,
@@ -123,7 +132,7 @@ function ResponsiveAppBar() {
               flexGrow: 1,
               fontFamily: 'monospace',
               letterSpacing: '.3rem',
-              color: 'inherit'
+              color: 'inherit',
             }}
           >
             LOGO
@@ -147,14 +156,14 @@ function ResponsiveAppBar() {
 
           {/* User menu */}
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title='Open settings'>
+            <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
             <Menu
               sx={{ mt: '45px' }}
-              id='menu-appbar'
+              id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
               keepMounted
