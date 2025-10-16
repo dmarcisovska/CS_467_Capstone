@@ -9,6 +9,7 @@ import ResponsiveAppBar from './components/Nav';
 import Home from './pages/Home'
 import Events from './pages/Events';
 import Create from './pages/Create';
+import Login from './pages/Login';
 
 function App() {
 
@@ -16,10 +17,11 @@ function App() {
     <>
     
     <ResponsiveAppBar/>
-     <Routes>
+      <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/events' element={<Events />} />
         <Route path='/create' element={<Create />} />
+        <Route path='/login' element={<Login />} />
       </Routes>
     </>
   )
