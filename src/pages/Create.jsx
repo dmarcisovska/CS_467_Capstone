@@ -76,6 +76,20 @@ const Create = () => {
                 <TextField fullWidth label="Location (parking / map notes)" />
 
                 <TextField fullWidth label="Distance" type="number" />
+                 <TextField
+                    select
+                    fullWidth
+                    label='Units'>
+                 
+                  </TextField>
+                   <TextField
+                    fullWidth
+                    label='Elevation Gain (ft or m)'
+                    type='number'
+                    inputProps={{ min: 0, step: 'any' }}
+                    
+                  />
+               
               </Grid>
             </Box>
           </Stack>
