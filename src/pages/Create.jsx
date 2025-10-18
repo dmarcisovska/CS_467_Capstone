@@ -17,7 +17,7 @@ import titleImg from '../assets/two_runners.jpg';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import RunCircleIcon from '@mui/icons-material/RunCircle';
-import heroImage from '../assets/trail.jpg'; 
+import heroImage from '../assets/trail_2.jpg'; 
 
 const Create = () => {
   return (
@@ -64,7 +64,7 @@ const Create = () => {
         height: '100vh',
         backgroundImage: `url(${heroImage})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        // backgroundPosition: 'center',
         // display: 'flex',
         // justifyContent: 'center',
         // alignItems: 'center',
@@ -72,7 +72,7 @@ const Create = () => {
       }}>
     
       <Container sx={{ pt: 12 }} >
-        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, opacity: .75 }}>
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, opacity: .8 }}>
           <Stack spacing={2}>
             <Typography variant="h4" fontWeight={600}>
               Event Details
