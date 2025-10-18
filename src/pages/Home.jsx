@@ -1,6 +1,6 @@
 import { Box, Typography, Button } from "@mui/material";
 import { Link } from 'react-router-dom'; 
-import heroImage from "../assets/running.jpg"
+import heroImage from "../assets/running_feet.jpg"
 
  function Home() {
   return (
@@ -23,7 +23,7 @@ import heroImage from "../assets/running.jpg"
         sx={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.3)",
+          backgroundColor: "rgba(0, 0, 0, 0.4)",
         }}
       />
 
