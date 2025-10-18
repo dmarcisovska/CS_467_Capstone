@@ -37,7 +37,7 @@ import heroImage from "../assets/running.jpg"
         </Typography>
         <Button variant="contained" color="primary" size="large" component={Link}
           to='/events' >
-          Explore Events
+          Explore Races
         </Button>
       </Box>
     </Box>
