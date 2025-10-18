@@ -16,11 +16,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import titleImg from '../assets/two_runners.jpg';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import heroImage from '../assets/trail.jpg'; 
 
 const Create = () => {
   return (
     <>
-      <Box
+      {/* <Box
         sx={{
           position: 'relative',
           height: '400px',
@@ -56,16 +57,27 @@ const Create = () => {
         >
           New Race
         </Typography>
-      </Box>
-      <Container>
-        <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
+      </Box> */}
+       <Box
+      sx={{
+        height: '100vh',
+        backgroundImage: `url(${heroImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        // display: 'flex',
+        // justifyContent: 'center',
+        // alignItems: 'center',
+        // position: 'relative',
+      }}>
+    
+      <Container sx={{ pt: 12 }} >
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, opacity: .75 }}>
           <Stack spacing={2}>
-            <Typography variant="h5" fontWeight={700}>
+            <Typography variant="h4" fontWeight={600}>
               Event Details
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Enter the basics for your race. You can add volunteers and other
-              extras later.
+              Enter the basics for your race. 
             </Typography>
 
             <Divider />
@@ -95,6 +107,7 @@ const Create = () => {
           </Stack>
         </Paper>
       </Container>
+      </Box>
     </>
   );
 };
