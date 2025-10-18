@@ -17,7 +17,7 @@ import titleImg from '../assets/two_runners.jpg';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import RunCircleIcon from '@mui/icons-material/RunCircle';
-import heroImage from '../assets/trail_2.jpg'; 
+import heroImage from '../assets/venti-views-sxzpqUHy9Gs-unsplash.jpg'; 
 
 const Create = () => {
   return (
