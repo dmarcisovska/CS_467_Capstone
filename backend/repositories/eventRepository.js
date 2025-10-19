@@ -1,3 +1,17 @@
+
+  // References: 1) "This SQL query was generated using the help of chat-gpt to help create a dynamic script.
+  //               "This transcript: "I want a postgresql query that uses a base query to retrieve all rows in the
+  //                events table, use the Haversine formula to calculate the distance in miles between
+  //                the input user latitude and longitude as lat and lng. Include support to this query by
+  //                 adding optional req queries radius, lat, lng, dateFilter of [upcoming, week, month or based on event_datetime],
+  //                startDate, endDate for custom date filtering, and support for sorting: sortBy=distance, participants, date.
+  //                "
+  //                I had to change the base sql query to include participants information since chatgpt did not know how to
+  //                find how many participants are part of an event.
+  
+  //                2) // Haversine formula for calculating distance between to points
+  //                Reference URL:  https://stackoverflow.com/questions/27708490/haversine-formula-definition-for-sql
+
 import pool from "../server.js";
 
 export const getEventsRepository = async (filters = {}) => {
@@ -8,7 +22,7 @@ export const getEventsRepository = async (filters = {}) => {
   const params = [];
   const conditions = [];
 
-  // base query
+  // base query + I added in participant_count by joining registrations table event_id on the events tables event_id column
   let query = `
     SELECT
       e.*,
@@ -37,6 +51,7 @@ export const getEventsRepository = async (filters = {}) => {
   } else if (dateFilter === "month") {
     conditions.push("e.event_datetime BETWEEN NOW() AND NOW() + INTERVAL '1 month'");
   } else if (startDate && endDate) {
+
     const startIndex = params.length + 1;
     params.push(startDate);
     const endIndex = params.length + 1;
@@ -46,9 +61,7 @@ export const getEventsRepository = async (filters = {}) => {
     );
   }
 
-  // Haversine formula for calculating distance between to points
-  // Reference URL:  https://stackoverflow.com/questions/27708490/haversine-formula-definition-for-sql
-
+  // if radius, lat, lng exists user wants to find events within distance
   if (radius && lat && lng) {
     const radiusIndex = params.length + 1;
     params.push(radius);
@@ -61,6 +74,7 @@ export const getEventsRepository = async (filters = {}) => {
     `);
   }
 
+// added by Brian Can, ensures only events with participants registered >= the minimum participants is returned.
   if (minParticipants) {
     params.push(minParticipants);
 
@@ -73,6 +87,8 @@ export const getEventsRepository = async (filters = {}) => {
 
   query += " GROUP BY e.event_id";
 
+
+  // added by Brian Can, ensures only events with participants registered >= the minimum participants is returned.
   if (minParticipants) {
     query += ` HAVING COUNT(r.user_id) >= $${params.length}`;
   }
