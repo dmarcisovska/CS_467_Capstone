@@ -41,7 +41,7 @@ const Create = () => {
             zIndex: 0,
           }}
         /> 
-        <Container sx={{ pt: 12, zIndex: 1, position: 'relative' }}>
+        <Container sx={{ pt: 8, zIndex: 1, position: 'relative',  }}>
           <Stack spacing={2}>
             <Typography
               variant="h2"
