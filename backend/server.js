@@ -1,61 +1,66 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import postgres from "postgres";
+
+import pg from "pg";
+const { Pool } = pg;
 
 import eventRoutes from "./routes/eventRoutes.js";
 
 const app = express();
-const PORT = 8080;
+// eslint-disable-next-line
+const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/events", eventRoutes);
+const pool = new Pool({
+    // eslint-disable-next-line
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+})
 
-// process.env
-// eslint-disable-next-line
-const connectionString = process.env.DATABASE_URL;
-const sql = postgres(connectionString, {
-  ssl: { rejectUnauthorized: false },
-});
-export default sql;
+export default pool
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello" });
+    res.json({ message: "test deploy 6" });
 });
 
 // DB connection tests; use the requests.http file
 app.get("/users", async (req, res) => {
-  try {
-    const users = await sql`SELECT * FROM users`;
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
-  }
+    try {
+        const result = await pool.query('SELECT * FROM users');
+        res.json(result.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 app.post("/users", async (req, res) => {
-  try {
+    try {
+        // TODO: Implement actual password hashing
 
-    // TODO: Implement actual password hashing
+        const { username, email, passwordHash } = req.body;
+        // eslint-disable-next-line
+        const newUser = await sql`
+            INSERT INTO users (username, email, password_hash)
+            VALUES (${username}, ${email}, ${passwordHash})
+            RETURNING *
+        `;
 
-    const { username, email, passwordHash } = req.body;
-    const newUser = await sql`
-      INSERT INTO users (username, email, password_hash)
-      VALUES (${username}, ${email}, ${passwordHash})
-      RETURNING *
-    `;
-    
-    res.status(201).json(newUser[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
-  }
+        res.status(201).json(newUser[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+    // eslint-disable-next-line
+    const port = process.env.NODE_ENV || "development"
+    console.log(`Server running on http://localhost:${PORT}`);
 });
