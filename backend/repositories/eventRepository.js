@@ -30,7 +30,6 @@ export const getEventsRepository = async (filters = {}) => {
   // enforce lat and long indexs
   params.push(lat ?? null, lng ?? null);
 
-  // --- 🗓️ Date filtering ---
   if (dateFilter === "upcoming") {
     conditions.push("e.event_datetime >= NOW()");
   } else if (dateFilter === "week") {
