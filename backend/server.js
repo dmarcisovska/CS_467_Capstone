@@ -59,6 +59,12 @@ app.post("/users", async (req, res) => {
 });
 
 
+
+
+app.use("/api/events", eventRoutes);
+
+
+
 app.listen(PORT, () => {
     // eslint-disable-next-line
     const port = process.env.NODE_ENV || "development"

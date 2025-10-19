@@ -10,3 +10,58 @@ Content-Type: application/json
 
 ### Test GET users
 GET http://localhost:8080/users
+
+
+
+
+
+ // Display-Events API HTTP test requests
+
+### GET All Events
+GET http://localhost:8080/api/events
+Accept: application/json
+
+
+### GET Upcoming Events (All future)
+GET http://localhost:8080/api/events?dateFilter=upcoming
+Accept: application/json
+
+
+### GET Events This Week (next 7 days)
+GET http://localhost:8080/api/events?dateFilter=week
+Accept: application/json
+
+
+### GET Events This Month (next 30 days)
+GET http://localhost:8080/api/events?dateFilter=month
+Accept: application/json
+
+
+### GET Custom Date Range (Oct 25 – Oct 30 2025)
+GET http://localhost:8080/api/events?startDate=2025-10-25&endDate=2025-10-30
+Accept: application/json
+
+
+### GET Within 100 mi of New York City
+GET http://localhost:8080/api/events?lat=40.7128&lng=-74.0060&radius=100
+Accept: application/json
+
+
+### GET  Within 100 mi of NYC AND Next Month
+GET http://localhost:8080/api/events?lat=40.7128&lng=-74.0060&radius=100&dateFilter=month
+Accept: application/json
+
+
+### GET Sort by Participants (descending)
+GET http://localhost:8080/api/events?sortBy=participants
+Accept: application/json
+
+
+### GET Sort by Date (soonest first)
+GET http://localhost:8080/api/events?sortBy=date
+Accept: application/json
+
+
+### GET Minimum Participants ≥ 4
+GET http://localhost:8080/api/events?minParticipants=4
+Accept: application/json
