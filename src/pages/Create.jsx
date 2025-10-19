@@ -13,47 +13,68 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import titleImg from '../assets/two_runners.jpg';
+import titleImg from '../assets/trail3.jpg';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import RunCircleIcon from '@mui/icons-material/RunCircle';
-import heroImage from '../assets/venti-views-sxzpqUHy9Gs-unsplash.jpg';
+
 
 const Create = () => {
   return (
+    <>
+     <Box
+      sx={{
+        position: 'relative',
+        height: '400px', 
+        backgroundImage: `url(${titleImg})`, 
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        textAlign: 'center',
+      }}
+    >
       <Box
         sx={{
-          height: '100vh',
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 1,
+        }}
+      />
+
+      {/* Title text */}
+      <Typography
+        variant="h2"
+        component="h1"
+        sx={{
           position: 'relative',
-          // backgroundPosition: 'center',
-          // display: 'flex',
-          // justifyContent: 'center',
-          // alignItems: 'center',
+          zIndex: 2,
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            zIndex: 0,
-          }}
-        /> 
-        <Container sx={{ pt: 8, zIndex: 1, position: 'relative',  }}>
+        Start a Race
+      </Typography>
+    </Box>
+      <Box
+      >
+       
+        <Container sx={{ pt: 4, zIndex: 1, position: 'relative',  maxWidth: { xs: '100%', sm: '600px', md: '700px' },  }}>
           <Stack spacing={2}>
             <Typography
-              variant="h2"
+              variant="h4"
               fontWeight={600}
-              sx={{ mb: 3, fontWeight: 'bold', color: 'white' }}
+              sx={{ mb: 3, fontWeight: 'semibold' }}
             >
               Event Details
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ color: 'white' }}
             >
               Enter the basics for your race.
             </Typography>
@@ -77,22 +98,14 @@ const Create = () => {
                   fullWidth
                   multiline
                   rows={4}
-                  sx={{
-                    mb: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                    borderRadius: 1,
-                  }}
+                
                 />
 
                 <TextField
                   fullWidth
                   label="Location (parking / map notes)"
                   variant="filled"
-                  sx={{
-                    mb: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                    borderRadius: 1,
-                  }}
+                 
                 />
 
                 <TextField
@@ -100,22 +113,14 @@ const Create = () => {
                   label="Distance"
                   type="number"
                   variant="filled"
-                  sx={{
-                    mb: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                    borderRadius: 1,
-                  }}
+                 
                 />
                 <TextField
                   select
                   fullWidth
                   label="Units "
                   variant="filled"
-                  sx={{
-                    mb: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                    borderRadius: 1,
-                  }}
+                  
                 ></TextField>
                 <TextField
                   fullWidth
@@ -123,11 +128,7 @@ const Create = () => {
                   variant="filled"
                   type="number"
                   inputProps={{ min: 0, step: 'any' }}
-                  sx={{
-                    mb: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                    borderRadius: 1,
-                  }}
+                
                 />
               </Grid>
             </Box>
@@ -143,6 +144,7 @@ const Create = () => {
           </Button>
         </Container>
       </Box>
+      </>
   );
 };
 
