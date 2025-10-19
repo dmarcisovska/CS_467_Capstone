@@ -3,16 +3,22 @@ import express from "express";
 import cors from "cors";
 import postgres from "postgres";
 
+import eventRoutes from "./routes/eventRoutes.js";
+
 const app = express();
 const PORT = 8080;
 
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/events", eventRoutes);
+
 // process.env
 // eslint-disable-next-line
 const connectionString = process.env.DATABASE_URL;
-const sql = postgres(connectionString);
+const sql = postgres(connectionString, {
+  ssl: { rejectUnauthorized: false },
+});
 export default sql;
 
 app.get("/", (req, res) => {
