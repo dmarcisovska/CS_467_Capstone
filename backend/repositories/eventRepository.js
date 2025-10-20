@@ -105,3 +105,13 @@ export const getEventsRepository = async (filters = {}) => {
   const { rows } = await pool.query(query, params);
   return rows;
 };
+
+
+export const getFeaturedEventsRepository = async () => {
+    query = `SELECT *, COUNT(r.event_id) as participantCount
+              FROM events
+              LEFT JOIN registrations r on events.event_id = r.event_id
+              GROUP BY events.event_id
+              ORDER BY participantCount DESC;
+              LIMIT 3`
+}
