@@ -108,7 +108,7 @@ export const getEventsRepository = async (filters = {}) => {
 
 
 export const getFeaturedEventsRepository = async () => {
-    query = `SELECT e.*, COUNT(r.user_id) as participantCount
+    const query = `SELECT e.*, COUNT(r.user_id) as participantCount
               FROM events e
               LEFT JOIN registrations r on e.event_id = r.event_id
               GROUP BY e.event_id

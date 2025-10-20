@@ -15,7 +15,7 @@ export const getEvents = async (req, res) => {
         }
 };
 
-
+// returns top 3 events by participant count, if less than 3 events exist, will return however many exists < 3.
 export const getFeaturedEvents = async (req, res) => {
 
   try {

@@ -68,3 +68,11 @@ Accept: application/json
 ### GET Minimum Participants ≥ 4
 GET http://localhost:8080/api/events?minParticipants=4
 Accept: application/json
+
+
+
+
+// Test for Featured Events
+
+### GET featured events (returns top 3 events by participant count)
+GET http://localhost:8080/api/events/featuredevents
