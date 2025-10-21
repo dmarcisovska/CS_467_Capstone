@@ -6,7 +6,6 @@ import pg from "pg";
 const { Pool } = pg;
 
 import eventRoutes from "./routes/eventRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 // eslint-disable-next-line
@@ -64,9 +63,6 @@ app.post("/users", async (req, res) => {
 
 app.use("/api/events", eventRoutes);
 
-// user routes
-// this has the authentication logic for now
-app.use("/api/user", userRoutes(pool));
 
 
 app.listen(PORT, () => {
