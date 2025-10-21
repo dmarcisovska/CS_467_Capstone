@@ -6,3 +6,8 @@ export const getEventsService = async (filters) => {
   
     return await eventRepository.getEventsRepository(filters);
 };
+
+export const getFeaturedEventsService = async () => {
+
+  return await eventRepository.getFeaturedEventsRepository();
+};

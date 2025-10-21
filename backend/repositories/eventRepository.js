@@ -1,5 +1,5 @@
 
-  // References: 1) "This SQL query was generated using the help of chat-gpt to help create a dynamic script.
+  // References: 1) "This SQL query for getEventsRepository function was generated using the help of chat-gpt to help create a dynamic script.
   //               "This transcript: "I want a postgresql query that uses a base query to retrieve all rows in the
   //                events table, use the Haversine formula to calculate the distance in miles between
   //                the input user latitude and longitude as lat and lng. Include support to this query by
@@ -105,3 +105,16 @@ export const getEventsRepository = async (filters = {}) => {
   const { rows } = await pool.query(query, params);
   return rows;
 };
+
+
+export const getFeaturedEventsRepository = async () => {
+    const query = `SELECT e.*, COUNT(r.user_id) as participantCount
+              FROM events e
+              LEFT JOIN registrations r on e.event_id = r.event_id
+              GROUP BY e.event_id
+              ORDER BY participantCount DESC
+              LIMIT 3;`
+
+    const { rows } = await pool.query(query);
+    return rows;
+}
