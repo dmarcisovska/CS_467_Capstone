@@ -76,3 +76,43 @@ Accept: application/json
 
 ### GET featured events (returns top 3 events by participant count)
 GET http://localhost:8080/api/events/featuredevents
+// User API HTTP test requests
+// I used ChatGPT for help with generating and troubleshooting these.
+
+### GET Specific user using user_id
+GET http://localhost:8080/api/user/profile/25f4c68d-092e-4b53-b70d-15f670a9695e
+Accept: application/json
+
+### PUT Update password for specific user
+PUT http://localhost:8080/api/user/profile/25f4c68d-092e-4b53-b70d-15f670a9695e
+Content-Type: application/json
+Accept: application/json
+
+{
+	"password": "newpassword123"
+}
+
+### PUT Delete specific user by setting is_deleted = true
+PUT http://localhost:8080/api/user/profile/delete/25f4c68d-092e-4b53-b70d-15f670a9695e
+Accept: application/json
+
+### POST Register for a user
+POST http://localhost:8080/api/user/register 
+Content-Type: application/json 
+Accept: application/json 
+
+{ 
+  "email": "test3@test3.com", 
+  "password": "password123", 
+  "username": "test_3" 
+}
+
+### POST Login with existing user
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "test3@test3.com",
+  "password": "password123"
+}
