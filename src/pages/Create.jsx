@@ -141,9 +141,18 @@ const Create = () => {
                   <TextField
                     select
                     fullWidth
-                    label="Units "
+                    label="Units"
                     variant="filled"
-                  ></TextField>
+                    sx={{
+                      mb: 2,
+                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                      borderRadius: 1,
+                    }}
+                    defaultValue="miles" // optional default
+                  >
+                    <MenuItem value="miles">Miles</MenuItem>
+                    <MenuItem value="km">Kilometers</MenuItem>
+                  </TextField>
                   <TextField
                     fullWidth
                     label="Elevation Gain (ft or m)"
@@ -158,7 +167,7 @@ const Create = () => {
           <Button
             variant="contained"
             size="large"
-            sx={{ mt: 2 }}
+            sx={{ mt: 4, mb: 4 }}
             endIcon={<RunCircleIcon />}
           >
             {' '}
