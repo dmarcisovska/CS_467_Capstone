@@ -5,6 +5,9 @@ import cors from "cors";
 import pg from "pg";
 const { Pool } = pg;
 
+import eventRoutes from "./routes/eventRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
 const app = express();
 // eslint-disable-next-line
 const PORT = process.env.PORT || 8080;
@@ -55,6 +58,15 @@ app.post("/users", async (req, res) => {
         res.status(500).json({ error: "Database error" });
     }
 });
+
+
+
+
+app.use("/api/events", eventRoutes);
+
+// user routes
+// this has the authentication logic for now
+app.use("/api/user", userRoutes(pool));
 
 
 app.listen(PORT, () => {
