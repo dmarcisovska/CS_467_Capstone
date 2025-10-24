@@ -3,6 +3,7 @@
  * - All timestamps are stored as UTC and converted to the user's local timezone
  */
 drop table if exists public.registrations;
+drop table if exists public.event_sponsors;
 drop table if exists public.event_roles;
 drop table if exists public.events;
 drop table if exists public.users;
@@ -71,6 +72,24 @@ create table public.event_roles (
     on update CASCADE
     on delete CASCADE,
   constraint positive_role_limit check (role_limit > 0)
+) tablespace pg_default;
+
+/*
+ * Table of sponsors and prizes for race events.
+ *
+ * Notes:
+ * - Composite key ensures sponsors cannot lot duplicate prizes for each event;
+ *   multiples of the same prize is handled by the quantity field
+ */
+create table public.event_sponsors (
+    id bigint generated always as identity,
+    event_id bigint not null,
+    sponsor character varying not null,
+    prize character varying null,
+    primary key (id),
+    foreign key (event_id) references events (event_id)
+        on update CASCADE
+        on delete CASCADE
 ) tablespace pg_default;
 
 /*

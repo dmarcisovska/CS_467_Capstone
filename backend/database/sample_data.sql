@@ -1,4 +1,7 @@
+-------------------------------------------------------------------------------
 -- Add users
+-------------------------------------------------------------------------------
+
 INSERT INTO public.users (user_id, email, password_hash, username, avatar_url, is_deleted) VALUES
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'john.smith@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFG', 'johnsmith', 'https://i.pravatar.cc/150?img=1', false),
 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'sarah.jones@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFH', 'sarahjones', 'https://i.pravatar.cc/150?img=2', false),
@@ -8,7 +11,10 @@ INSERT INTO public.users (user_id, email, password_hash, username, avatar_url, i
 ('f5eebc99-9c0b-4ef8-bb6d-6bb9bd380a66', 'lisa.garcia@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFL', 'lisagarcia', NULL, false),
 ('a6eebc99-9c0b-4ef8-bb6d-6bb9bd380a77', 'deleted.user@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFM', 'deleteduser', NULL, true);
 
+-------------------------------------------------------------------------------
 -- Add events
+-------------------------------------------------------------------------------
+
 INSERT INTO public.events (event_id, creator_user_id, name, description, event_datetime, latitude, longitude, distance, elevation, difficulty) VALUES
 (1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Mountain Trail 5K', 'A scenic 5K through mountain trails with moderate elevation gain. Perfect for trail running enthusiasts!', '2025-11-15 09:00:00+00', 40.7128, -74.0060, 5.0, 350.5, 'Moderate'),
 (2, 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'City Marathon', 'Annual city marathon through downtown streets. Flat course ideal for PR attempts.', '2025-12-01 08:00:00+00', 34.0522, -118.2437, 42.195, 120.0, 'Easy'),
@@ -17,7 +23,10 @@ INSERT INTO public.events (event_id, creator_user_id, name, description, event_d
 (5, 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44', 'Forest Trail Half Marathon', 'Half marathon through peaceful forest trails with rolling hills.', '2025-12-15 09:30:00+00', 47.6062, -122.3321, 21.0975, 450.0, 'Moderate'),
 (6, 'e4eebc99-9c0b-4ef8-bb6d-6bb9bd380a55', 'Park Fun Run 2K', 'Short fun run in the local park. Great for beginners and families.', '2025-10-28 10:00:00+00', 41.8781, -87.6298, 2.0, 20.0, 'Easy');
 
+-------------------------------------------------------------------------------
 -- Add event roles and limits
+-------------------------------------------------------------------------------
+
 INSERT INTO public.event_roles (event_id, role, role_limit) VALUES
 
 -- Mountain Trail 5K
@@ -50,7 +59,62 @@ INSERT INTO public.event_roles (event_id, role, role_limit) VALUES
 (6, 'Starting Official', 1),
 (6, 'Finish Line Official', 2);
 
+-------------------------------------------------------------------------------
+-- Add event sponsors and prizes
+-------------------------------------------------------------------------------
+
+-- Mountain Trail 5K
+INSERT INTO public.event_sponsors (event_id, sponsor, prize) VALUES
+(1, 'Patagonia', 'Running Caps'),
+(1, 'REI', NULL),
+(1, 'Garmin', 'GPS Watches'),
+(1, 'Clif Bar', 'Energy Bar Packs'),
+(1, 'Smartwater', NULL);
+
+-- City Marathon
+INSERT INTO public.event_sponsors (event_id, sponsor, prize) VALUES
+(2, 'Nike', 'Running Shoes'),
+(2, 'Gatorade', NULL),
+(2, 'Asics', 'Running Shirts'),
+(2, 'Fitbit', NULL),
+(2, 'Uber', 'Ride Vouchers ($20)');
+
+-- Extreme Ultra Trail 50K
+INSERT INTO public.event_sponsors (event_id, sponsor, prize) VALUES
+(3, 'Salomon', 'Trail Running Shoes'),
+(3, 'Red Bull', NULL),
+(3, 'The North Face', 'Technical Jackets'),
+(3, 'Garmin', NULL),
+(3, 'CamelBak', 'Hydration Packs');
+
+-- Sunset Beach 10K
+INSERT INTO public.event_sponsors (event_id, sponsor, prize) VALUES
+(4, 'Oakley', 'Sunglasses'),
+(4, 'Coca-Cola', NULL),
+(4, 'BeachFit', 'Gym Memberships (1 month)'),
+(4, 'FlipFlop Co.', 'Beach Towels'),
+(4, 'SunBum', NULL);
+
+-- Forest Trail Half Marathon
+INSERT INTO public.event_sponsors (event_id, sponsor, prize) VALUES
+(5, 'Columbia Sportswear', NULL),
+(5, 'Brooks', 'Running Shoes'),
+(5, 'Kind Snacks', 'Snack Boxes'),
+(5, 'Hydro Flask', NULL),
+(5, 'AllTrails', 'Premium Subscriptions (1 year)');
+
+-- Park Fun Run 2K
+INSERT INTO public.event_sponsors (event_id, sponsor, prize) VALUES
+(6, 'Local Bakery', 'Cupcake Coupons'),
+(6, 'City Fitness', NULL),
+(6, 'ToyCo', 'Kids Toy Packs'),
+(6, 'Target', NULL),
+(6, 'Starbucks', 'Coffee Vouchers');
+
+-------------------------------------------------------------------------------
 -- Insert Registrations
+-------------------------------------------------------------------------------
+
 INSERT INTO public.registrations (event_id, user_id, role, start_time, finish_time) VALUES
 
 -- Mountain Trail 5K
