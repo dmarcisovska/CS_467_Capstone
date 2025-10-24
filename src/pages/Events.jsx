@@ -1,7 +1,7 @@
 import React from 'react'
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import titleImg from '../assets/running_feet.jpg'
+import titleImg from '../assets/gigi-bIpKSEsaN6Q-unsplash.jpg';
 
 const Events = () => {
   return (
