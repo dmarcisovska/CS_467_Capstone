@@ -33,11 +33,10 @@ const Events = () => {
       setError(null);
       const data = await fetchEvents({ sortBy, dateFilter });
       setEvents(data);
-      console.log('Events loaded:', data); // Move it here to log the data
+      console.log('Events loaded:', data);
     } catch (err) {
       setError('Failed to load events. Please try again later.');
     } finally {
-      // Remove the console.log from here
       setLoading(false);
     }
   };
@@ -93,8 +92,6 @@ const Events = () => {
             zIndex: 1,
           }}
         />
-
-        {/* Title text */}
         <Typography
           variant="h2"
           component="h1"
@@ -157,96 +154,98 @@ const Events = () => {
                 No events found. Try adjusting your filters.
               </Typography>
             ) : (
-              <Box  sx={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        gap: 2,
-      }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  gap: 2,
+                }}
+              >
                 {events.map((event) => (
                   <Box
-          key={event.event_id}
-          sx={{
-            flex: { xs: '1 1 100%', md: '1 1 calc(50% - 16px)' },
-            display: 'flex',
-          }}
-        >
-                  <Card sx={{
-              flexGrow: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              
-            }}>
-                    {/* <CardMedia
-                      sx={{ height: 100 }}
-                      image={cardImg}
-                      title="green iguana"
-                    /> */}
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography gutterBottom variant="h5" component="h2">
-                        {event.name}
-                      </Typography>
-
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 2 }}
-                      >
-                        {event.description}
-                      </Typography>
-
-                      <Stack spacing={1}>
-                        <Typography variant="body2">
-                          <strong>Date:</strong>{' '}
-                          {formatDate(event.event_datetime)}
+                    key={event.event_id}
+                    sx={{
+                      flex: { xs: '1 1 100%', md: '1 1 calc(50% - 16px)' },
+                      display: 'flex',
+                    }}
+                  >
+                    <Card
+                      sx={{
+                        flexGrow: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <CardContent sx={{ flexGrow: 1 }}>
+                        <Typography gutterBottom variant="h5" component="h2">
+                          {event.name}
                         </Typography>
 
-                        <Typography variant="body2">
-                          <strong>Distance:</strong> {event.distance} miles
-                        </Typography>
-
-                        {event.elevation && (
-                          <Typography variant="body2">
-                            <strong>Elevation:</strong> {event.elevation} ft
-                          </Typography>
-                        )}
-
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            gap: 1,
-                            flexWrap: 'wrap',
-                            mt: 1,
-                          }}
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 2 }}
                         >
-                          {event.difficulty && (
-                            <Chip
-                              label={event.difficulty}
-                              color={getDifficultyColor(event.difficulty)}
-                              size="small"
-                            />
-                          )}
-                          <Chip
-                            label={`${
-                              event.participant_count || 0
-                            } participants`}
-                            size="small"
-                            variant="outlined"
-                          />
-                        </Box>
-                      </Stack>
-                    </CardContent>
+                          {event.description}
+                        </Typography>
 
-                    <CardActions sx={{mb: 2}}>
-                      <Button variant="contained" size="small" color="primary">
-                        View Details
-                      </Button>
-                      <Button variant="outlined" size="small" color="primary">
-                        Register
-                      </Button>
-                    </CardActions>
-                  </Card>
-                     </Box>
+                        <Stack spacing={1}>
+                          <Typography variant="body2">
+                            <strong>Date:</strong>{' '}
+                            {formatDate(event.event_datetime)}
+                          </Typography>
+
+                          <Typography variant="body2">
+                            <strong>Distance:</strong> {event.distance} miles
+                          </Typography>
+
+                          {event.elevation && (
+                            <Typography variant="body2">
+                              <strong>Elevation:</strong> {event.elevation} ft
+                            </Typography>
+                          )}
+
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              gap: 1,
+                              flexWrap: 'wrap',
+                              mt: 1,
+                            }}
+                          >
+                            {event.difficulty && (
+                              <Chip
+                                label={event.difficulty}
+                                color={getDifficultyColor(event.difficulty)}
+                                size="small"
+                              />
+                            )}
+                            <Chip
+                              label={`${
+                                event.participant_count || 0
+                              } participants`}
+                              size="small"
+                              variant="outlined"
+                            />
+                          </Box>
+                        </Stack>
+                      </CardContent>
+
+                      <CardActions sx={{ mb: 2 }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="primary"
+                        >
+                          View Details
+                        </Button>
+                        <Button variant="outlined" size="small" color="primary">
+                          Register
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  </Box>
                 ))}
               </Box>
             )}
