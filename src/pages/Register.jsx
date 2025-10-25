@@ -10,6 +10,10 @@ import titleImg from '../assets/nature-run.jpg';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 const Register = () => {
   const VisuallyHiddenInput = styled('input')({
@@ -30,7 +34,7 @@ const Register = () => {
     username: '',
     password: '',
     confirmPassword: '',
-    age: '',
+    birthday: null,
     avatarUrl: '',
   });
   const [error, setError] = useState('');
@@ -43,16 +47,25 @@ const Register = () => {
     });
   };
 
+  const handleBirthdayChange = (newValue) => {
+    setFormData({
+      ...formData,
+      birthday: newValue,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
+    // Validation
     if (
       !formData.name ||
       !formData.email ||
       !formData.username ||
-      !formData.password
+      !formData.password ||
+      !formData.birthday
     ) {
       setError('Please fill in all required fields.');
       return;
@@ -68,10 +81,16 @@ const Register = () => {
       return;
     }
 
-    if (formData.age && parseInt(formData.age) < 16) {
+    const today = dayjs();
+    const birthDate = dayjs(formData.birthday);
+    const age = today.diff(birthDate, 'year');
+
+    if (age < 16) {
       setError('You must be at least 16 years old to register.');
       return;
     }
+
+    setSuccess('Registration successful! Redirecting to login...');
   };
 
   return (
@@ -115,129 +134,134 @@ const Register = () => {
       </Box>
 
       <Container sx={{ py: 4, maxWidth: '600px !important' }}>
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            backgroundColor: 'background.paper',
-            p: 4,
-            borderRadius: 2,
-            boxShadow: 3,
-          }}
-        >
-          <Stack spacing={3}>
-            <Typography variant="h5" fontWeight={300}>
-              Register for our site
-            </Typography>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{
+              backgroundColor: 'background.paper',
+              p: 4,
+              borderRadius: 2,
+              boxShadow: 3,
+            }}
+          >
+            <Stack spacing={3}>
+              <Typography variant="h5" fontWeight={300}>
+                Register for our site
+              </Typography>
 
-            {error && <Alert severity="error">{error}</Alert>}
-            {success && <Alert severity="success">{success}</Alert>}
+              {error && <Alert severity="error">{error}</Alert>}
+              {success && <Alert severity="success">{success}</Alert>}
 
-            <TextField
-              required
-              fullWidth
-              label="Full Name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              variant="filled"
-            />
-
-            <TextField
-              required
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              variant="filled"
-            />
-
-            <TextField
-              required
-              fullWidth
-              label="Username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              variant="filled"
-              helperText="This will be your public display name"
-            />
-
-            <TextField
-              required
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              variant="filled"
-              helperText="Must be at least 8 characters"
-            />
-
-            <TextField
-              required
-              fullWidth
-              label="Confirm Password"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              variant="filled"
-            />
-
-            <TextField
-              fullWidth
-              label="Age"
-              name="age"
-              type="number"
-              value={formData.age}
-              onChange={handleChange}
-              variant="filled"
-              inputProps={{ min: 16 }}
-              helperText="Must be at least 16 years old"
-            />
-
-            <Button
-              component="label"
-              role={undefined}
-              variant="outlined"
-              tabIndex={-1}
-              startIcon={<CloudUploadIcon />}
-            >
-              Upload avatar
-              <VisuallyHiddenInput
-                type="file"
-                onChange={(event) => console.log(event.target.files)}
-                multiple
+              <TextField
+                required
+                fullWidth
+                label="Full Name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                variant="filled"
               />
-            </Button>
 
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              fullWidth
-              endIcon={<PersonAddIcon />}
-              sx={{ mt: 2 }}
-            >
-              Register
-            </Button>
+              <TextField
+                required
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                variant="filled"
+              />
 
-            <Typography
-              variant="body2"
-              textAlign="center"
-              color="text.secondary"
-            >
-              Already have an account?{' '}
-              <Button href="/login" sx={{ textTransform: 'none' }}>
-                Log in here
+              <TextField
+                required
+                fullWidth
+                label="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                variant="filled"
+                helperText="This will be your public display name"
+              />
+
+              <TextField
+                required
+                fullWidth
+                label="Password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                variant="filled"
+                helperText="Must be at least 8 characters"
+              />
+
+              <TextField
+                required
+                fullWidth
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                variant="filled"
+              />
+
+              <DatePicker
+                label="Birthdate"
+                value={formData.birthday}
+                onChange={handleBirthdayChange}
+                maxDate={dayjs().subtract(16, 'year')}
+                slotProps={{
+                  textField: {
+                    variant: 'filled',
+                    fullWidth: true,
+                    helperText: 'You must be at least 16 years old',
+                    required: true,
+                  },
+                }}
+              />
+
+              <Button
+                component="label"
+                role={undefined}
+                variant="outlined"
+                tabIndex={-1}
+                startIcon={<CloudUploadIcon />}
+              >
+                Upload avatar
+                <VisuallyHiddenInput
+                  type="file"
+                  onChange={(event) => console.log(event.target.files)}
+                  multiple
+                />
               </Button>
-            </Typography>
-          </Stack>
-        </Box>
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                endIcon={<PersonAddIcon />}
+                sx={{ mt: 2 }}
+              >
+                Register
+              </Button>
+
+              <Typography
+                variant="body2"
+                textAlign="center"
+                color="text.secondary"
+              >
+                Already have an account?{' '}
+                <Button href="/login" sx={{ textTransform: 'none' }}>
+                  Log in here
+                </Button>
+              </Typography>
+            </Stack>
+          </Box>
+        </LocalizationProvider>
       </Container>
     </>
   );
