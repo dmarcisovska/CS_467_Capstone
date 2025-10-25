@@ -1,0 +1,46 @@
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+export const fetchEvents = async (filters = {}) => {
+  try {
+
+    const queryParams = new URLSearchParams();
+    
+    if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+    if (filters.dateFilter) queryParams.append('dateFilter', filters.dateFilter);
+    if (filters.radius) queryParams.append('radius', filters.radius);
+    if (filters.lat) queryParams.append('lat', filters.lat);
+    if (filters.lng) queryParams.append('lng', filters.lng);
+    if (filters.minParticipants) queryParams.append('minParticipants', filters.minParticipants);
+    if (filters.startDate) queryParams.append('startDate', filters.startDate);
+    if (filters.endDate) queryParams.append('endDate', filters.endDate);
+
+    const url = `${API_BASE_URL}/api/events${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch events');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
+};
+
+export const fetchFeaturedEvents = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/events/featuredevents`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch featured events');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching featured events:', error);
+    throw error;
+  }
+};
