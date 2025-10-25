@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
+import { Paper } from '@mui/material';
 
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
@@ -156,95 +157,96 @@ const Events = () => {
                 No events found. Try adjusting your filters.
               </Typography>
             ) : (
-              <Box sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'space-between',
-                gap: 2,
-              }}>
+              <Box  sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 2,
+      }}>
                 {events.map((event) => (
                   <Box
-                    key={event.event_id}
-                    sx={{
-                      flex: '1 1 calc(50% - 16px)',
-                      display: 'flex',
-                    }}
-                  >
-                    <Card sx={{
-                      flexGrow: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}>
-                      <CardMedia
-                        sx={{ height: 100 }}
-                        image={cardImg}
-                        title="green iguana"
-                      />
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography gutterBottom variant="h5" component="h2">
-                          {event.name}
+          key={event.event_id}
+          sx={{
+            flex: { xs: '1 1 100%', md: '1 1 calc(50% - 16px)' },
+            display: 'flex',
+          }}
+        >
+                  <Card sx={{
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              
+            }}>
+                    {/* <CardMedia
+                      sx={{ height: 100 }}
+                      image={cardImg}
+                      title="green iguana"
+                    /> */}
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography gutterBottom variant="h5" component="h2">
+                        {event.name}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                      >
+                        {event.description}
+                      </Typography>
+
+                      <Stack spacing={1}>
+                        <Typography variant="body2">
+                          <strong>Date:</strong>{' '}
+                          {formatDate(event.event_datetime)}
                         </Typography>
 
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 2 }}
+                        <Typography variant="body2">
+                          <strong>Distance:</strong> {event.distance} miles
+                        </Typography>
+
+                        {event.elevation && (
+                          <Typography variant="body2">
+                            <strong>Elevation:</strong> {event.elevation} ft
+                          </Typography>
+                        )}
+
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            gap: 1,
+                            flexWrap: 'wrap',
+                            mt: 1,
+                          }}
                         >
-                          {event.description}
-                        </Typography>
-
-                        <Stack spacing={1}>
-                          <Typography variant="body2">
-                            <strong>Date:</strong>{' '}
-                            {formatDate(event.event_datetime)}
-                          </Typography>
-
-                          <Typography variant="body2">
-                            <strong>Distance:</strong> {event.distance} miles
-                          </Typography>
-
-                          {event.elevation && (
-                            <Typography variant="body2">
-                              <strong>Elevation:</strong> {event.elevation} ft
-                            </Typography>
-                          )}
-
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              gap: 1,
-                              flexWrap: 'wrap',
-                              mt: 1,
-                            }}
-                          >
-                            {event.difficulty && (
-                              <Chip
-                                label={event.difficulty}
-                                color={getDifficultyColor(event.difficulty)}
-                                size="small"
-                              />
-                            )}
+                          {event.difficulty && (
                             <Chip
-                              label={`${
-                                event.participant_count || 0
-                              } participants`}
+                              label={event.difficulty}
+                              color={getDifficultyColor(event.difficulty)}
                               size="small"
-                              variant="outlined"
                             />
-                          </Box>
-                        </Stack>
-                      </CardContent>
+                          )}
+                          <Chip
+                            label={`${
+                              event.participant_count || 0
+                            } participants`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </Box>
+                      </Stack>
+                    </CardContent>
 
-                      <CardActions>
-                        <Button variant="contained" size="small" color="primary">
-                          View Details
-                        </Button>
-                        <Button variant="outlined" size="small" color="primary">
-                          Register
-                        </Button>
-                      </CardActions>
-                    </Card>
-                  </Box>
+                    <CardActions sx={{mb: 2}}>
+                      <Button variant="contained" size="small" color="primary">
+                        View Details
+                      </Button>
+                      <Button variant="outlined" size="small" color="primary">
+                        Register
+                      </Button>
+                    </CardActions>
+                  </Card>
+                     </Box>
                 ))}
               </Box>
             )}
