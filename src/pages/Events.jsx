@@ -149,12 +149,12 @@ const Events = () => {
                 No events found. Try adjusting your filters.
               </Typography>
             ) : (
-              <Box>
+              <Grid rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                 {events.map((event) => (
-                  <Box key={event.event_id} sx={{ mb: 4 }}>
-                    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography gutterBottom variant="h5" component="h2">
+                 <Grid size={6} key={event.event_id}>
+                    <Card>
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="h2">ß
                           {event.name}
                         </Typography>
                         
@@ -203,9 +203,9 @@ const Events = () => {
                         </Button>
                       </CardActions>
                     </Card>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
+              </Grid>
             )}
           </>
         )}
