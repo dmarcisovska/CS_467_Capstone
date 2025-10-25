@@ -1,0 +1,4 @@
+# Generate QR code
+GET http://localhost:8080/api/raceday/make-qr?event=7&user=23
+
+

@@ -7,6 +7,7 @@ const { Pool } = pg;
 
 import eventRoutes from "./routes/eventRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import racedayRoutes from "./routes/racedayRoutes.js";
 
 const app = express();
 // eslint-disable-next-line
@@ -40,29 +41,8 @@ app.get("/users", async (req, res) => {
     }
 });
 
-app.post("/users", async (req, res) => {
-    try {
-        // TODO: Implement actual password hashing
-
-        const { username, email, passwordHash } = req.body;
-        // eslint-disable-next-line
-        const newUser = await sql`
-            INSERT INTO users (username, email, password_hash)
-            VALUES (${username}, ${email}, ${passwordHash})
-            RETURNING *
-        `;
-
-        res.status(201).json(newUser[0]);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Database error" });
-    }
-});
-
-
-
-
 app.use("/api/events", eventRoutes);
+app.use("/api/raceday", racedayRoutes);
 
 // user routes
 // this has the authentication logic for now
