@@ -1,0 +1,246 @@
+import React, { useState } from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
+import titleImg from '../assets/nature-run.jpg';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { styled } from '@mui/material/styles';
+
+const Register = () => {
+  const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+  });
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    age: '',
+    avatarUrl: '',
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.username ||
+      !formData.password
+    ) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (formData.age && parseInt(formData.age) < 16) {
+      setError('You must be at least 16 years old to register.');
+      return;
+    }
+  };
+
+  return (
+    <>
+      <Box
+        sx={{
+          position: 'relative',
+          height: '400px',
+          backgroundImage: `url(${titleImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          textAlign: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            zIndex: 1,
+          }}
+        />
+
+        <Typography
+          variant="h2"
+          component="h1"
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
+          Create Account
+        </Typography>
+      </Box>
+
+      <Container sx={{ py: 4, maxWidth: '600px !important' }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            backgroundColor: 'background.paper',
+            p: 4,
+            borderRadius: 2,
+            boxShadow: 3,
+          }}
+        >
+          <Stack spacing={3}>
+            <Typography variant="h5" fontWeight={300}>
+              Register for our site
+            </Typography>
+
+            {error && <Alert severity="error">{error}</Alert>}
+            {success && <Alert severity="success">{success}</Alert>}
+
+            <TextField
+              required
+              fullWidth
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              variant="filled"
+            />
+
+            <TextField
+              required
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              variant="filled"
+            />
+
+            <TextField
+              required
+              fullWidth
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              variant="filled"
+              helperText="This will be your public display name"
+            />
+
+            <TextField
+              required
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              variant="filled"
+              helperText="Must be at least 8 characters"
+            />
+
+            <TextField
+              required
+              fullWidth
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              variant="filled"
+            />
+
+            <TextField
+              fullWidth
+              label="Age"
+              name="age"
+              type="number"
+              value={formData.age}
+              onChange={handleChange}
+              variant="filled"
+              inputProps={{ min: 16 }}
+              helperText="Must be at least 16 years old"
+            />
+
+            <Button
+              component="label"
+              role={undefined}
+              variant="outlined"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload avatar
+              <VisuallyHiddenInput
+                type="file"
+                onChange={(event) => console.log(event.target.files)}
+                multiple
+              />
+            </Button>
+
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth
+              endIcon={<PersonAddIcon />}
+              sx={{ mt: 2 }}
+            >
+              Register
+            </Button>
+
+            <Typography
+              variant="body2"
+              textAlign="center"
+              color="text.secondary"
+            >
+              Already have an account?{' '}
+              <Button href="/login" sx={{ textTransform: 'none' }}>
+                Log in here
+              </Button>
+            </Typography>
+          </Stack>
+        </Box>
+      </Container>
+    </>
+  );
+};
+
+export default Register;
