@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';3
+import Typography from '@mui/material/Typography';
+3;
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -15,6 +18,7 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import titleImg from '../assets/gigi-bIpKSEsaN6Q-unsplash.jpg';
 import { fetchEvents } from '../services/api';
+import cardImg from '../assets/trail.jpg';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -58,52 +62,56 @@ const Events = () => {
     return colors[difficulty] || 'default';
   };
 
-   useEffect(() => {
+  useEffect(() => {
     loadEvents();
   }, [sortBy, dateFilter]);
 
   return (
     <>
-    <Box
-      sx={{
-        position: 'relative',
-        height: '400px', 
-        backgroundImage: `url(${titleImg})`, 
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        textAlign: 'center',
-      }}
-    >
       <Box
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          zIndex: 1,
-        }}
-      />
-
-      {/* Title text */}
-      <Typography
-        variant="h2"
-        component="h1"
-        sx={{
           position: 'relative',
-          zIndex: 2,
+          height: '400px',
+          backgroundImage: `url(${titleImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          textAlign: 'center',
         }}
       >
-        Upcoming Races
-      </Typography>
-    </Box>
-    <Container sx={{ py: 4 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            zIndex: 1,
+          }}
+        />
+
+        {/* Title text */}
+        <Typography
+          variant="h2"
+          component="h1"
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
+          Upcoming Races
+        </Typography>
+      </Box>
+      <Container sx={{ py: 4 }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          sx={{ mb: 4 }}
+        >
           <TextField
             select
             label="Sort By"
@@ -149,61 +157,78 @@ const Events = () => {
                 No events found. Try adjusting your filters.
               </Typography>
             ) : (
-              <Grid rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+              <Grid>
                 {events.map((event) => (
-                 <Grid size={6} key={event.event_id}>
-                    <Card>
-                      <CardContent>
-                        <Typography gutterBottom variant="h5" component="h2">ß
-                          {event.name}
+                  <Card sx={{ mb: 4 }} key={event.event_id}>
+                    <CardMedia
+                      sx={{ height: 100 }}
+                      image={cardImg}
+                      title="green iguana"
+                    />
+                    <CardContent>
+                      <Typography gutterBottom variant="h5" component="h2">
+                        {event.name}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                      >
+                        {event.description}
+                      </Typography>
+
+                      <Stack spacing={1}>
+                        <Typography variant="body2">
+                          <strong>Date:</strong>{' '}
+                          {formatDate(event.event_datetime)}
                         </Typography>
-                        
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          {event.description}
+
+                        <Typography variant="body2">
+                          <strong>Distance:</strong> {event.distance} miles
                         </Typography>
 
-                        <Stack spacing={1}>
+                        {event.elevation && (
                           <Typography variant="body2">
-                            <strong>Date:</strong> {formatDate(event.event_datetime)}
+                            <strong>Elevation:</strong> {event.elevation} ft
                           </Typography>
-                          
-                          <Typography variant="body2">
-                            <strong>Distance:</strong> {event.distance} miles
-                          </Typography>
+                        )}
 
-                          {event.elevation && (
-                            <Typography variant="body2">
-                              <strong>Elevation:</strong> {event.elevation} ft
-                            </Typography>
-                          )}
-
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-                            {event.difficulty && (
-                              <Chip
-                                label={event.difficulty}
-                                color={getDifficultyColor(event.difficulty)}
-                                size="small"
-                              />
-                            )}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            gap: 1,
+                            flexWrap: 'wrap',
+                            mt: 1,
+                          }}
+                        >
+                          {event.difficulty && (
                             <Chip
-                              label={`${event.participant_count || 0} participants`}
+                              label={event.difficulty}
+                              color={getDifficultyColor(event.difficulty)}
                               size="small"
-                              variant="outlined"
                             />
-                          </Box>
-                        </Stack>
-                      </CardContent>
+                          )}
+                          <Chip
+                            label={`${
+                              event.participant_count || 0
+                            } participants`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </Box>
+                      </Stack>
+                    </CardContent>
 
-                      <CardActions>
-                        <Button variant="contained" size="small" color="primary">
-                          View Details
-                        </Button>
-                        <Button variant="outlined" size="small" color="primary">
-                          Register
-                        </Button>
-                      </CardActions>
-                    </Card>
-                  </Grid>
+                    <CardActions>
+                      <Button variant="contained" size="small" color="primary">
+                        View Details
+                      </Button>
+                      <Button variant="outlined" size="small" color="primary">
+                        Register
+                      </Button>
+                    </CardActions>
+                  </Card>
                 ))}
               </Grid>
             )}
@@ -211,8 +236,7 @@ const Events = () => {
         )}
       </Container>
     </>
+  );
+};
 
-  )
-}
-
-export default Events
+export default Events;
