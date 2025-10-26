@@ -59,7 +59,6 @@ const Register = () => {
     setError('');
     setSuccess('');
 
-    // Validation
     if (
       !formData.name ||
       !formData.email ||
