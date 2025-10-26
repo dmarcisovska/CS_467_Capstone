@@ -10,47 +10,39 @@ import userRoutes from "./routes/userRoutes.js";
 import racedayRoutes from "./routes/racedayRoutes.js";
 
 const app = express();
+const PORT = 8080;
+
+// Set base URL depending on runtime environment
 // eslint-disable-next-line
-const PORT = process.env.PORT || 8080;
+export const BASE_URL = process.env.BASE_URL;
 
 app.use(cors());
 app.use(express.json());
 
+// Database connection
 const pool = new Pool({
     // eslint-disable-next-line
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
-})
-
-export default pool
-
-app.get("/", (req, res) => {
-    res.json({ message: "test deploy 6" });
 });
+export default pool;
 
-// DB connection tests; use the requests.http file
-app.get("/users", async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM users');
-        res.json(result.rows);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Database error" });
-    }
-});
-
+// Routes
+app.use("/api/user", userRoutes(pool));
 app.use("/api/events", eventRoutes);
 app.use("/api/raceday", racedayRoutes);
 
-// user routes
-// this has the authentication logic for now
-app.use("/api/user", userRoutes(pool));
-
-
+// Start server
+pool.query("SELECT NOW()", (err) => {
+    if (err) {
+        console.error(`Database connection failed: ${err}`);
+    
+    } else {
+        console.log("Database connection successful");
+    }
+});
 app.listen(PORT, () => {
-    // eslint-disable-next-line
-    const port = process.env.NODE_ENV || "development"
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on ${BASE_URL}`);
 });
