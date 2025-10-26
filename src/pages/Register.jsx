@@ -182,7 +182,7 @@ const Register = () => {
                 value={formData.username}
                 onChange={handleChange}
                 variant="filled"
-                helperText="This will be your public display name"
+           
               />
 
               <TextField
