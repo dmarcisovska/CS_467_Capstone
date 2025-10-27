@@ -118,3 +118,21 @@ export const getFeaturedEventsRepository = async () => {
     const { rows } = await pool.query(query);
     return rows;
 }
+
+
+
+export const getEventByIdRepository = async (eventId) => {
+  try {
+  const query = `SELECT e.*
+                  FROM events e
+                  WHERE e.event_id = $1`;
+  
+  const result = await pool.query(query, [eventId]);
+
+  return result.rows[0] || null;
+
+} catch(error) {
+  console.error("Error in event repository", error.message);
+  throw error;
+  }
+}

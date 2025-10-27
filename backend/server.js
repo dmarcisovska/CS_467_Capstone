@@ -18,9 +18,7 @@ app.use(express.json());
 const pool = new Pool({
     // eslint-disable-next-line
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: {rejectUnauthorized: false}
 })
 
 export default pool
