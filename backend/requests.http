@@ -79,16 +79,28 @@ GET http://localhost:8080/api/events/featuredevents
 // User API HTTP test requests
 // I used ChatGPT for help with generating and troubleshooting these.
 
-### GET Specific user using user_id
-GET http://localhost:8080/api/user/profile/25f4c68d-092e-4b53-b70d-15f670a9695e
-Accept: application/json
-
-### PUT Update password for specific user
-PUT http://localhost:8080/api/user/profile/25f4c68d-092e-4b53-b70d-15f670a9695e
+### Login as user
+POST http://localhost:8080/api/user/login
 Content-Type: application/json
-Accept: application/json
 
 {
+  "email": "ha@test2.com",
+  "password": "password123"
+}
+
+### GET Specific user using user_id
+GET http://localhost:8080/api/user/profile/52b96efc-3ce3-455c-aeac-8bd9efdc5b58
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTJiOTZlZmMtM2NlMy00NTVjLWFlYWMtOGJkOWVmZGM1YjU4IiwiZW1haWwiOiJoYUB0ZXN0Mi5jb20iLCJpYXQiOjE3NjE1NDE1MzcsImV4cCI6MTc2MjE0NjMzN30.TD4W9F2U0urm4WpmwrZN-sMzIgv42oS2zBZ_KqYWNyI
+
+### PUT Update password for specific user
+PUT http://localhost:8080/api/user/profile/52b96efc-3ce3-455c-aeac-8bd9efdc5b58
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTJiOTZlZmMtM2NlMy00NTVjLWFlYWMtOGJkOWVmZGM1YjU4IiwiZW1haWwiOiJoYUB0ZXN0Mi5jb20iLCJpYXQiOjE3NjE1NDE1MzcsImV4cCI6MTc2MjE0NjMzN30.TD4W9F2U0urm4WpmwrZN-sMzIgv42oS2zBZ_KqYWNyI
+
+{
+  "username": "new_ha_test_2",
 	"password": "newpassword123"
 }
 

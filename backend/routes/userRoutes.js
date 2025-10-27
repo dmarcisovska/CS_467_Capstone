@@ -4,11 +4,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
+
 const router = express.Router();
 
 
 
-export default function userRoutes(pool) {
+export default function userRoutes(pool, authMiddleware) {
   // POST login a user
   router.post('/login', async (req, res) => {
     try {
@@ -107,7 +108,7 @@ export default function userRoutes(pool) {
 
       // success
       res.status(200).json({
-        message: 'user was registered',
+        message: 'user registered successfully',
         user: {
           user_id: user.user_id,
           email: user.email,
@@ -125,7 +126,7 @@ export default function userRoutes(pool) {
   })
 
   // GET current user
-  router.get('/profile/:user_id', async (req, res) => {
+  router.get('/profile/:user_id', authMiddleware, async (req, res) => {
     try {
       const { user_id } = req.params;
 
@@ -145,10 +146,14 @@ export default function userRoutes(pool) {
   })
 
   // UPDATE a user
-  router.put('/profile/:user_id', async (req, res) => {
+  router.put('/profile/:user_id', authMiddleware, async (req, res) => {
     try {
       const {user_id} = req.params;
       const {username, avatar_url, password} = req.body;
+
+      if (req.user.user_id !== user_id) {
+        return res.status(403).json({error: 'cannot delete, wrong account'});
+      }
 
       const existingUser = await pool.query(`
         SELECT * 
@@ -190,8 +195,12 @@ export default function userRoutes(pool) {
   })
 
     // DELETE a user
-    router.put('/profile/delete/:user_id', async (req, res) => {
+    router.put('/profile/delete/:user_id', authMiddleware, async (req, res) => {
       const {user_id} = req.params;
+
+      if (req.user.user_id !== user_id) {
+        return res.status(403).json({error: 'cannot edit, wrong account'});
+      }
 
       const existingUser = await pool.query(`
         SELECT * 
