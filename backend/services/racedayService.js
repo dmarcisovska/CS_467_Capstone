@@ -16,7 +16,7 @@ export const updateFinishTimeService = async (event, user) => {
     }
     try {
         const registration = await getRegistration(event, user);
-        
+
         // Check if registration exists
         if (!registration) {
             throw new Error("Registration not found");
@@ -32,6 +32,15 @@ export const updateFinishTimeService = async (event, user) => {
         console.error(
             "updateFinishTimeService database operation failed: ", error
         );
-        throw new Error("Failed to update finish time: Database error");
+
+        // Handles invalid user inputs. Because user is a UUID, invalid values
+        // throw a database error, bypassing the `if (!registration)` check.
+        // This is a less-than-ideal implementation because it catches *all*
+        // database failures, which can lead to mis-labeling other errors.
+        // TODO: See if there is a better way to implement this
+        if (error.message?.toLowerCase().includes("database operation failed")) {
+            throw new Error("Registration not found");
+        }
+        throw error; // return the specific error to racedayController.js
     }
 };

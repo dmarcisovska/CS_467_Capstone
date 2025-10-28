@@ -3,26 +3,31 @@ import { createQrCode } from "../services/qrCodeService.js";
 import { updateFinishTimeService } from "../services/racedayService.js"
 
 /**
- * Returns the SVG code for a QR code that identifies a user in an event. 
+ * Returns the SVG code for a QR code that identifies a user in an event.
  * 
- * Usage: GET http://localhost:8080/api/raceday/make-qr?event=7&user=23
+ * Expects `event` (number) and `user` (uuid) as URL query parameters.
+ * Returns an SVG if successful, otherwise a JSON with the error message.
  */
 export const createRacerQrCode = async (req, res) => {
     try {
-        const { event, user } = req.query; // URL query params
+        const { event, user } = req.query;
 
-        // Set the destination URL as the endpoint that sets finish times 
-        const qrCodeUrl = (
-            "https://cs467capstone.up.railway.app" +
-            `/api/raceday/set-finish-time?event=${event}&user=${user}`
-        );
+        // Validate all inputs are provided
+        if (!event || !user) {
+            return res.status(400).json({ 
+                error: "Event and user are required" 
+            });
+        }
+
+        // Build URL and generate QR code embedded with that URL
+        const qrCodeUrl = `${BASE_URL}/api/raceday/set-finish-time?event=${event}&user=${user}`;
         const qrCode = await createQrCode(qrCodeUrl);
 
         res.setHeader("Content-Type", "image/svg+xml");
         res.status(200).send(qrCode);
-    } catch (error) {
-        console.log(`Failed to generate QR code: ${error}`);
-        res.status(500);
+
+    } catch {
+        res.status(500).json({ error: "Failed to generate QR code" });
     }
 }
 /**
@@ -48,7 +53,7 @@ export const updateFinishTime = async (req, res) => {
     } catch (error) {
         console.error("Error updating finish time:", error);
         
-        // Return specific HTTP codes based on the error message 
+        // Return specific HTTP codes based on error message to improve tracing 
         // TODO: Convert to a map/lookup for better scalability
         if (error.message === "Registration not found") {
             return res.status(404).json({ error: error.message });
