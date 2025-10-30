@@ -118,3 +118,96 @@ export const getFeaturedEventsRepository = async () => {
     const { rows } = await pool.query(query);
     return rows;
 }
+
+export const createEventRepository = async(eventData) => {
+  const query = `
+    INSERT INTO events (
+      creator_user_id,
+      name,
+      event_datetime,
+      latitude,
+      longitude,
+      description,
+      distance,
+      elevation,
+      difficulty
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    RETURNING *
+  `;
+
+  const params = [
+    eventData.creator_user_id,
+    eventData.name,
+    eventData.event_datetime,
+    eventData.latitude,
+    eventData.longitude,
+    eventData.description,
+    eventData.distance,
+    eventData.elevation,
+    eventData.difficulty
+  ]
+
+  const { rows } = await pool.query(query, params);
+  return rows;
+}
+
+export const getEventByIdRepository = async (eventId) => {
+  const query = `
+    SELECT e.*, COUNT(r.user_id) AS participant_count
+    FROM events e
+    LEFT JOIN registrations r ON e.event_id = r.event_id
+    WHERE e.event_id = $1
+    GROUP BY e.event_id
+  `;
+
+  const { rows } = await pool.query(query, [eventId]);
+  return rows;
+}
+
+export const updateEventRepository = async (eventId, newData) => {
+  // COALESCE allows the code to use new data if it is not null
+  const query = `
+    UPDATE events
+    SET
+      creator_user_id = COALESCE($1, creator_user_id),
+      name = COALESCE($2, name),
+      event_datetime = COALESCE($3, event_datetime),
+      latitude = COALESCE($4, latitude),
+      longitude = COALESCE($5, longitude),
+      description = COALESCE($6, description),
+      distance = COALESCE($7, distance),
+      elevation = COALESCE($8, elevation),
+      difficulty = COALESCE($9, difficulty),
+      updated_at = CURRENT_TIMESTAMP
+    WHERE event_id = $10
+    RETURNING *
+  `;
+
+  const params = [
+    newData.creator_user_id,
+    newData.name,
+    newData.event_datetime,
+    newData.latitude,
+    newData.longitude,
+    newData.description,
+    newData.distance,
+    newData.elevation,
+    newData.difficulty,
+    eventId
+  ];
+  
+  const { rows } = await pool.query(query, params);
+  return rows;
+}
+
+export const deleteEventRepository = async (eventId) => {
+  const query = `
+    DELETE FROM events
+    WHERE event_id = $1
+    RETURNING *
+  `;
+
+  const { rows} = await pool.query(query, [eventId]);
+  return rows;
+}

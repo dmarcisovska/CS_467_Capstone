@@ -1,4 +1,4 @@
-import { getEventsService, getFeaturedEventsService } from "../services/eventService.js"
+import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService } from "../services/eventService.js"
 
 
 
@@ -26,3 +26,55 @@ export const getFeaturedEvents = async (req, res) => {
     res.status(500).json({ error: "failed to fetch featured events"});
   }
 };
+
+export const createEvent = async (req, res) => {
+  try {
+    // should use the given data in the body
+    const newEvent = await createEventService(req.body);
+    res.status(200).json(newEvent);
+
+  } catch (error) {
+    console.error("Error creating event:", error);
+    res.status(500).json({ error: "Failed to create" });
+        }
+}
+
+export const getEventById = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+
+    const event = await getEventByIdService(eventId);
+
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error getting event by ID:", error);
+    res.status(500).json({ error: "Failed to retrieve"});
+  }
+}
+
+export const updateEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const newData = req.body;
+
+    const event = await updateEventService(eventId, newData);
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error updating event by ID:", error);
+    res.status(500).json({ error: "Failed to update"});
+  }
+}
+
+export const deleteEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+
+    const event = await deleteEventService(eventId);
+    res.status(200).json(event);
+
+  } catch (error) {
+    console.error("Error deleting event by ID:", error);
+    res.status(500).json({ error: "Failed to delete"});
+    
+  }
+}
