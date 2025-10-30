@@ -27,17 +27,28 @@ const Events = () => {
   const [sortBy, setSortBy] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
-  const loadEvents = async () => {
+  const loadEvents = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true);
+      // Save current scroll position before background refresh
+      const scrollPosition = isBackgroundRefresh ? window.scrollY : null;
+    
+      if (!isBackgroundRefresh) setLoading(true);
       setError(null);
       const data = await fetchEvents({ sortBy, dateFilter });
       setEvents(data);
       console.log('Events loaded:', data);
-    } catch (err) {
+    
+      // Restore scroll position after background refresh
+      if (scrollPosition !== null) {
+        setTimeout(() => {
+          window.scrollTo(0, scrollPosition);
+        }, 0);
+      }
+    } catch {
       setError('Failed to load events. Please try again later.');
+      
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) setLoading(false);
     }
   };
 
@@ -61,8 +72,23 @@ const Events = () => {
     return colors[difficulty] || 'default';
   };
 
+  // Initial event data fetch on page load
   useEffect(() => {
-    loadEvents();
+    loadEvents(false);
+  }, [sortBy, dateFilter]);
+
+  // Continuous event data fetch to update event cards
+  // Does not reset sort or filter
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!document.hidden) { // do not refresh if tab is inactive
+        loadEvents(true);
+      }
+    }, 30000 ); // 30000ms = 30 seconds
+
+    // Cleanup between background refreshes
+    // Helps avoids memory leak and duplication issues
+    return () => clearInterval(intervalId);
   }, [sortBy, dateFilter]);
 
   return (
