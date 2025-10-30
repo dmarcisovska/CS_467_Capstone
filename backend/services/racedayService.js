@@ -1,8 +1,41 @@
 import {
-    updateFinishTime,
-    getRegistration
+    getEventRegistrationStatus,
+    getRegistration,
+    updateStartTime,
+    updateFinishTime
 } from "../repositories/racedayRepository.js";
 
+/**
+ * Validates input and event start_time before updating the start time.
+ * @param {number} event The event_id that the user is registered for.
+ * @returns {boolean} True if the operation succeeds, otherwise false.
+ */
+export const updateStartTimeService = async (event) => {
+    
+    if (!event) {
+        throw new Error("Event is required");
+    }
+    try {
+        const eventStatus = await getEventRegistrationStatus(event);
+
+        console.log(eventStatus);
+
+        // Check if the event exists
+        if (!eventStatus || !eventStatus.event_exists) {
+            throw new Error("Event not found");
+        }
+        if (eventStatus.start_time_count !== '0') {
+            throw new Error("Start time already recorded");
+        }
+        return await updateStartTime(event);
+
+    } catch (error) {
+        console.error(
+            "updateStartTimeService database operation failed: ", error
+        );
+        throw error; // return the specific error to racedayController.js
+    }
+};
 /**
  * Validates inputs against the registration before updating the finish time.
  * @param {number} event The event_id that the user is registered for.
