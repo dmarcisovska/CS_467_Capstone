@@ -7,6 +7,7 @@ const { Pool } = pg;
 
 import eventRoutes from "./routes/eventRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import geocodeRoutes from "./routes/geocodeRoutes.js";
 
 const app = express();
 // eslint-disable-next-line
@@ -59,15 +60,9 @@ app.post("/users", async (req, res) => {
     }
 });
 
-
-
-
 app.use("/api/events", eventRoutes);
-
-// user routes
-// this has the authentication logic for now
 app.use("/api/user", userRoutes(pool));
-
+app.use("/api/geocode", geocodeRoutes);
 
 app.listen(PORT, () => {
     // eslint-disable-next-line

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
@@ -19,8 +19,83 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import RunCircleIcon from '@mui/icons-material/RunCircle';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Autocomplete from 'react-google-autocomplete';
 
 const Create = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    date: null,
+    startTime: null,
+    description: '',
+    address: '',
+    latitude: null,
+    longitude: null,
+    distance: '',
+    units: 'miles',
+    elevation: '',
+    difficulty: '',
+    sponsors: '',
+    prizes: '',
+  });
+
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleDateChange = (newValue) => {
+    setFormData({ ...formData, date: newValue });
+  };
+
+  const handleTimeChange = (newValue) => {
+    setFormData({ ...formData, startTime: newValue });
+  };
+
+  const handlePlaceSelected = (place) => {
+    console.log('Place selected:', place);
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      
+      setFormData({
+        ...formData,
+        address: place.formatted_address,
+        latitude: lat,
+        longitude: lng,
+      });
+      setGeocodeError('');
+      
+      // Log the location details
+      console.log('Location found:', place.formatted_address);
+      console.log('Coordinates:', lat.toFixed(4), lng.toFixed(4));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.name || !formData.date || !formData.startTime || !formData.address) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (!formData.latitude || !formData.longitude) {
+      alert('Please select an address from the suggestions');
+      return;
+    }
+
+    // TODO: Submit to your backend API
+    console.log('Form data:', formData);
+  };
+
   return (
     <>
       <Box
@@ -83,12 +158,16 @@ const Create = () => {
 
             <Divider />
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Box component="form" noValidate>
+              <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Grid container spacing={2}>
                   <TextField
                     fullWidth
+                    name="name"
                     label="Event Name"
+                    value={formData.name}
+                    onChange={handleChange}
                     variant="filled"
+                    required
                     sx={{
                       mb: 2,
                       backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -97,10 +176,13 @@ const Create = () => {
                   />
                   <DatePicker
                     label="Event Date"
+                    value={formData.date}
+                    onChange={handleDateChange}
                     slotProps={{
                       textField: {
                         variant: 'filled',
                         fullWidth: true,
+                        required: true,
                         sx: {
                           mb: 2,
                           backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -111,10 +193,13 @@ const Create = () => {
                   />
                   <TimePicker
                     label="Start Time"
+                    value={formData.startTime}
+                    onChange={handleTimeChange}
                     slotProps={{
                       textField: {
                         variant: 'filled',
                         fullWidth: true,
+                        required: true,
                         sx: {
                           mb: 2,
                           backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -125,37 +210,79 @@ const Create = () => {
                   />
 
                   <TextField
+                    name="description"
                     label="Event Description"
+                    value={formData.description}
+                    onChange={handleChange}
                     variant="filled"
                     fullWidth
                     multiline
                     rows={4}
                   />
 
+                  <Typography variant="h6" sx={{ mt: 3, mb: 1, width: '100%' }}>
+                    Event Location
+                  </Typography>
+
+                  <Autocomplete
+                    apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                    onPlaceSelected={handlePlaceSelected}
+                    options={{
+                      types: ['address'],
+                      componentRestrictions: { country: 'us' },
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '16.5px 14px',
+                      fontSize: '16px',
+                      border: 'none',
+                      borderBottom: '1px solid rgba(0,0,0,0.42)',
+                      backgroundColor: 'rgba(0,0,0,0.06)',
+                      borderRadius: '4px 4px 0 0',
+                      marginBottom: '16px',
+                      fontFamily: 'Roboto, sans-serif',
+                    }}
+                    placeholder="Start typing an address..."
+                  />
+
+                  {geocodeError && (
+                    <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                      {geocodeError}
+                    </Alert>
+                  )}
+
                   <TextField
                     fullWidth
+                    name="distance"
                     label="Distance"
                     type="number"
+                    value={formData.distance}
+                    onChange={handleChange}
                     variant="filled"
                   />
                   <TextField
                     select
                     fullWidth
+                    name="units"
                     label="Units"
+                    value={formData.units}
+                    onChange={handleChange}
                     variant="filled"
                     sx={{
                       mb: 2,
                       backgroundColor: 'rgba(255, 255, 255, 0.85)',
                       borderRadius: 1,
                     }}
-                    defaultValue="miles" // optional default
                   >
                     <MenuItem value="miles">Miles</MenuItem>
                     <MenuItem value="km">Kilometers</MenuItem>
                   </TextField>
                   <TextField
                     fullWidth
+                    name="elevation"
                     label="Elevation Gain (ft or m)"
+                    value={formData.elevation}
+                    onChange={handleChange}
                     variant="filled"
                     type="number"
                     inputProps={{ min: 0, step: 'any' }}
@@ -163,20 +290,27 @@ const Create = () => {
                   <TextField
                     select
                     fullWidth
+                    name="difficulty"
                     label="Difficulty"
+                    value={formData.difficulty}
+                    onChange={handleChange}
                     variant="filled"
                   >
                     <MenuItem value="Easy">Easy</MenuItem>
                     <MenuItem value="Moderate">Moderate</MenuItem>
                     <MenuItem value="Hard">Hard</MenuItem>
                   </TextField>
-                  <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
+
+                  <Typography variant="h6" sx={{ mt: 3, mb: 1, width: '100%' }}>
                     Sponsors & Prizes (Optional)
                   </Typography>
 
                   <TextField
                     fullWidth
+                    name="sponsors"
                     label="Sponsors"
+                    value={formData.sponsors}
+                    onChange={handleChange}
                     variant="filled"
                     multiline
                     rows={2}
@@ -185,25 +319,29 @@ const Create = () => {
 
                   <TextField
                     fullWidth
+                    name="prizes"
                     label="Prizes"
+                    value={formData.prizes}
+                    onChange={handleChange}
                     variant="filled"
                     multiline
                     rows={2}
                     placeholder="Describe any prizes or awards"
                   />
                 </Grid>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  sx={{ mt: 4, mb: 4 }}
+                  endIcon={<RunCircleIcon />}
+                >
+                  Create Running Event
+                </Button>
               </Box>
             </LocalizationProvider>
           </Stack>
-          <Button
-            variant="contained"
-            size="large"
-            sx={{ mt: 4, mb: 4 }}
-            endIcon={<RunCircleIcon />}
-          >
-            {' '}
-            Create Running Event
-          </Button>
         </Container>
       </Box>
     </>
