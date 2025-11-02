@@ -160,6 +160,37 @@ const Create = () => {
                     type="number"
                     inputProps={{ min: 0, step: 'any' }}
                   />
+                  <TextField
+                    select
+                    fullWidth
+                    label="Difficulty"
+                    variant="filled"
+                  >
+                    <MenuItem value="Easy">Easy</MenuItem>
+                    <MenuItem value="Moderate">Moderate</MenuItem>
+                    <MenuItem value="Hard">Hard</MenuItem>
+                  </TextField>
+                  <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
+                    Sponsors & Prizes (Optional)
+                  </Typography>
+
+                  <TextField
+                    fullWidth
+                    label="Sponsors"
+                    variant="filled"
+                    multiline
+                    rows={2}
+                    placeholder="List any sponsors"
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Prizes"
+                    variant="filled"
+                    multiline
+                    rows={2}
+                    placeholder="Describe any prizes or awards"
+                  />
                 </Grid>
               </Box>
             </LocalizationProvider>
