@@ -1,6 +1,9 @@
 import { BASE_URL } from "../server.js";
 import { createQrCode } from "../services/qrCodeService.js";
-import { updateFinishTimeService } from "../services/racedayService.js"
+import {
+    updateStartTimeService,
+    updateFinishTimeService
+} from "../services/racedayService.js"
 
 /**
  * Returns the SVG code for a QR code that identifies a user in an event.
@@ -28,6 +31,39 @@ export const createRacerQrCode = async (req, res) => {
 
     } catch {
         res.status(500).json({ error: "Failed to generate QR code" });
+    }
+}
+export const updateStartTime = async (req, res) => {
+    try {
+        const { event } = req.query;
+
+        const success = await updateStartTimeService(event);        
+        if (success) {
+            return res.status(200).json({ 
+                message: "Start time recorded successfully" 
+            });
+        } else {
+            return res.status(404).json({ 
+                error: "Event not found or start time already set" 
+            });
+        }
+    } catch (error) {
+        console.error("Error updating finish time:", error);
+        
+        // Return specific HTTP codes based on error message to improve tracing 
+        // TODO: Convert to a map/lookup for better scalability
+        if (error.message === "Event is required") {
+            return res.status(400).json({ error: error.message });
+        }
+        if (error.message === "Event not found") {
+            return res.status(404).json({ error: error.message });
+        }
+        if (error.message === "Start time already recorded") {
+            return res.status(409).json({ error: error.message });
+        }
+        return res.status(500).json({ 
+            error: "Failed to update start time" 
+        });
     }
 }
 /**
