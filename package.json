@@ -16,9 +16,11 @@
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "@mui/x-date-pickers": "^8.14.1",
+    "@react-google-maps/api": "^2.20.7",
     "dayjs": "^1.11.18",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-google-autocomplete": "^2.7.5",
     "react-router-dom": "^7.9.4"
   },
   "devDependencies": {

@@ -8,6 +8,7 @@ const { Pool } = pg;
 import eventRoutes from "./routes/eventRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import racedayRoutes from "./routes/racedayRoutes.js";
+import geocodeRoutes from "./routes/geocodeRoutes.js";
 
 const app = express();
 const PORT = 8080;
@@ -43,6 +44,11 @@ pool.query("SELECT NOW()", (err) => {
         console.log("Database connection successful");
     }
 });
+
+app.use("/api/events", eventRoutes);
+app.use("/api/user", userRoutes(pool));
+app.use("/api/geocode", geocodeRoutes);
+
 app.listen(PORT, () => {
     console.log(`Server running on ${BASE_URL}`);
 });
