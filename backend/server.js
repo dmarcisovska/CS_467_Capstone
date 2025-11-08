@@ -24,11 +24,14 @@ app.use(express.json());
 const pool = new Pool({
     // eslint-disable-next-line
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: {rejectUnauthorized: false}
+})
+
+export default pool
+
+app.get("/", (req, res) => {
+    res.json({ message: "test deploy 6" });
 });
-export default pool;
 
 // Routes
 app.use("/api/user", userRoutes(pool));
