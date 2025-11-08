@@ -43,4 +43,3 @@ export const fetchFeaturedEvents = async () => {
     throw error;
   }
 };
-
