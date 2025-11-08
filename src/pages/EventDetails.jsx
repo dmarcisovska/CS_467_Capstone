@@ -291,7 +291,7 @@ const EventDetails = () => {
                       height="100%"
                       frameBorder="0"
                       style={{ border: 0 }}
-                      src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${event.latitude},${event.longitude}&zoom=15`}
+                      src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(address || `${event.latitude},${event.longitude}`)}&zoom=15`}
                       allowFullScreen
                     />
                   </Box>
