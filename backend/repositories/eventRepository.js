@@ -11,6 +11,10 @@
   
   //                2) // Haversine formula for calculating distance between to points
   //                Reference URL:  https://stackoverflow.com/questions/27708490/haversine-formula-definition-for-sql
+  //
+  //                3) Used AI to help update the query for retrieving sponsor data, volunteer data, and role data from other tables to my existing
+  //                    sql query in getEventByIDRepository(). Prompted AI "How do I return list of data in a single object in postgresql"
+  //                    AI taught me how to use json_agg() and json_build_obj() to do so and I used the examples to call and join on other tables to get data.                
 
 import pool from "../server.js";
 
@@ -145,9 +149,34 @@ export const unregisterForEventRepository = async (eventId, userId) => {
 
 export const getEventByIdRepository = async (eventId) => {
   try {
-  const query = `SELECT e.*
-                  FROM events e
-                  WHERE e.event_id = $1`;
+  // Utilized AI to help return lists of data from other tables.
+  const query = `SELECT e.*,
+
+              (SELECT json_agg(json_build_object('role', er.role, 'role_limit', er.role_limit))
+              FROM event_roles er
+              WHERE er.event_id = e.event_id) AS roles,
+              
+              (SELECT json_agg(json_build_object('id', es.id, 'sponsor', es.sponsor, 'prize', es.prize))
+              FROM event_sponsors es
+              WHERE es.event_id = e.event_id
+              ) AS sponsors,
+               
+              (SELECT json_agg(json_build_object(
+                'user_id', u.user_id,
+                'username', u.username,
+                'email', u.email,
+                'avatar_url', u.avatar_url,
+                'role', r.role
+                  )
+                )
+                FROM registrations r
+                JOIN users u
+                  ON r.user_id = u.user_id
+                WHERE r.event_id = e.event_id
+                AND r.role <> 'Runner'
+                ) AS volunteers
+                FROM events e
+                WHERE e.event_id = $1`;
   
   const result = await pool.query(query, [eventId]);
 
