@@ -1,4 +1,4 @@
-import { getEventsService, getFeaturedEventsService } from "../services/eventService.js"
+import { getEventsService, getFeaturedEventsService, registerForEventService, unregisterForEventService } from "../services/eventService.js"
 
 
 
@@ -26,3 +26,33 @@ export const getFeaturedEvents = async (req, res) => {
     res.status(500).json({ error: "failed to fetch featured events"});
   }
 };
+
+
+export const registerForEvent = async (req, res) => {
+    const { eventId } = req.params;
+    const {user_id, role} = req.body;
+
+    try {
+      const result = await registerForEventService(eventId, user_id, role)
+      return res.status(201).json(result)
+    } catch (error) {
+      console.error("Register error:", error);
+
+      return res.status(error.status = 400).json({
+      error: error.message = "Already registered for this event"
+    });
+  }
+};
+
+export const unregisterForEvent = async (req, res) => {
+  const { eventId, userId } = req.params;
+
+
+  try {
+      await unregisterForEventService(eventId, userId);
+      res.status(200).json({ message: "Successfully unregistered"});
+
+    } catch (error) {
+    res.status(400).json({ error: "failed to unregister from event"})
+    }
+  }

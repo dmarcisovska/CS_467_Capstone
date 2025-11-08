@@ -118,3 +118,25 @@ export const getFeaturedEventsRepository = async () => {
     const { rows } = await pool.query(query);
     return rows;
 }
+
+
+export const registerForEventRepository = async (eventId, userId, role) => {
+  const query = `
+  INSERT INTO registrations (event_id, user_id, role)
+  VALUES ($1, $2, $3)
+  RETURNING *;`
+  
+  const { rows } = await pool.query(query, [eventId, userId, role]);
+  return rows[0];
+}
+
+
+export const unregisterForEventRepository = async (eventId, userId) => {
+  const query = `
+  DELETE FROM registrations
+  WHERE event_id = $1 AND user_id = $2
+  RETURNING *`;
+  
+  const { rows } = await pool.query(query, [eventId, userId]);
+  return rows[0];
+}
