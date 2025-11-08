@@ -17,13 +17,14 @@ import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { NavLink } from 'react-router-dom';
 import avatarImg from "../assets/denisa.jpeg"
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Profile', 'Account', 'Dashboard', 'Logout', 'Register'];
 
 const pages = [
   { text: 'Home', to: '/' },
   { text: 'Events', to: '/events' },
   { text: 'Create Event', to: '/create' },
     { text: 'Login', to: '/login' },
+  { text: 'Register', to: '/register' },
 ];
 
 function ResponsiveAppBar() {
