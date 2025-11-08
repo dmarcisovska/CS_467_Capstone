@@ -213,37 +213,32 @@ const EventDetails = () => {
               </Alert>
             )}
 
-        <Paper sx={{ p: 4 }}>
+        <Paper sx={{ p: 4, position: 'relative' }}>
+          {/* Chips in upper right corner */}
+          <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {event.difficulty && (
+              <Chip
+                label={event.difficulty}
+                color={getDifficultyColor(event.difficulty)}
+                sx={{ height: '40px', fontSize: '1rem', fontWeight: 600 }}
+              />
+            )}
+            <Chip
+              icon={<PeopleIcon />}
+              label={`${event.participant_count || 0} participants`}
+              variant="outlined"
+              sx={{ height: '40px', fontSize: '1rem' }}
+            />
+          </Box>
+
           <Stack spacing={4}>
-            
-
-          
-
-           
-
             <Box>
-              <Typography variant="h3" gutterBottom fontWeight={400}>
-                About This Race
+              <Typography variant="h3" fontWeight={400} sx={{ mb: 1 }}>
+                About
               </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
+              <Typography variant="body1" color="text.secondary">
                 {event.description || 'No description available.'}
               </Typography>
-            </Box>
-
-             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              {event.difficulty && (
-                <Chip
-                  label={event.difficulty}
-                  color={getDifficultyColor(event.difficulty)}
-                  size="large"
-                />
-              )}
-              <Chip
-                icon={<PeopleIcon />}
-                label={`${event.participant_count || 0} participants`}
-                variant="outlined"
-                size="large"
-              />
             </Box>
 
             <Box>
@@ -307,7 +302,7 @@ const EventDetails = () => {
                 sx={{ maxWidth: 400 }}
                 onClick={() => alert('Registered')}
               >
-                Register for race
+                Register 
               </Button>
             </Box>
           </Stack>
