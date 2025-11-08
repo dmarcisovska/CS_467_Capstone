@@ -145,9 +145,38 @@ export const unregisterForEventRepository = async (eventId, userId) => {
 
 export const getEventByIdRepository = async (eventId) => {
   try {
-  const query = `SELECT e.*
+  /*const query = `SELECT e.*
                   FROM events e
                   WHERE e.event_id = $1`;
+  */
+
+  const query = `SELECT e.*,
+
+              (SELECT json_agg(json_build_object('role', er.role, 'role_limit', er.role_limit))
+              FROM event_roles er
+              WHERE er.event_id = e.event_id) AS roles,
+              
+              (SELECT json_agg(json_build_object('id', es.id, 'sponsor', es.sponsor, 'prize', es.prize))
+              FROM event_sponsors es
+              WHERE es.event_id = e.event_id
+              ) AS sponsors,
+               
+              (SELECT json_agg(json_build_object(
+                'user_id', u.user_id,
+                'username', u.username,
+                'email', u.email,
+                'avatar_url', u.avatar_url,
+                'role', r.role
+                  )
+                )
+                FROM registrations r
+                JOIN users u
+                  ON r.user_id = u.user_id
+                WHERE r.event_id = e.event_id
+                AND r.role <> 'Runner'
+                ) AS volunteers
+                FROM events e
+                WHERE e.event_id = $1`;
   
   const result = await pool.query(query, [eventId]);
 
