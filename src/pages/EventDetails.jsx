@@ -17,6 +17,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
 import { fetchEventById } from '../services/api';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -325,9 +326,12 @@ const EventDetails = () => {
                     .map((sponsorData) => (
                       <Paper key={sponsorData.id} sx={{ p: 2, bgcolor: 'grey.50' }}>
                         {sponsorData.sponsor && (
+                          <>
+                          <EmojiEventsIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
                           <Typography variant="body1" fontWeight={600}>
                             {sponsorData.sponsor}
                           </Typography>
+                          </>
                         )}
                         {sponsorData.prize && (
                           <Typography variant="body2" color="text.secondary" sx={{ mt: sponsorData.sponsor ? 0.5 : 0 }}>
