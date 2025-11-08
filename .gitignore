@@ -26,3 +26,4 @@ dist-ssr
 # Credentials
 .env
 .env.local
+backend/.env

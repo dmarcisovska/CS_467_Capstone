@@ -76,6 +76,16 @@ Accept: application/json
 
 ### GET featured events (returns top 3 events by participant count)
 GET http://localhost:8080/api/events/featuredevents
+
+
+
+// Test to get a single event
+
+### GET All Events
+GET http://localhost:8080/api/events/5
+Accept: application/json
+
+
 // User API HTTP test requests
 // I used ChatGPT for help with generating and troubleshooting these.
 
