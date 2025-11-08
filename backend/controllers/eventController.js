@@ -1,5 +1,4 @@
-import { getEventsService, getFeaturedEventsService, registerForEventService, unregisterForEventService, getEventByIdService } from "../services/eventService.js"
-
+import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService } from "../services/eventService.js"
 
 
 export const getEvents = async (req, res) => {
@@ -27,6 +26,57 @@ export const getFeaturedEvents = async (req, res) => {
   }
 };
 
+export const createEvent = async (req, res) => {
+  try {
+    // should use the given data in the body
+    const newEvent = await createEventService(req.body);
+    res.status(200).json(newEvent);
+
+  } catch (error) {
+    console.error("Error creating event:", error);
+    res.status(500).json({ error: "Failed to create" });
+        }
+}
+
+export const getEventById = async (req, res) => {
+  try {
+    const eventId = req.params.event_id;
+
+    const event = await getEventByIdService(eventId);
+    res.status(200).json(event);
+
+  } catch (error) {
+    console.log("Error fetching the event", error);
+    res.status(500).json({error: "Failed to fetch an event"});
+  }
+}
+
+export const updateEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const newData = req.body;
+
+    const event = await updateEventService(eventId, newData);
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error updating event by ID:", error);
+    res.status(500).json({ error: "Failed to update"});
+  }
+}
+
+export const deleteEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+
+    const event = await deleteEventService(eventId);
+    res.status(200).json(event);
+
+  } catch (error) {
+    console.error("Error deleting event by ID:", error);
+    res.status(500).json({ error: "Failed to delete"});
+  }
+};
+    
 
 export const registerForEvent = async (req, res) => {
     const { eventId } = req.params;
@@ -52,21 +102,9 @@ export const unregisterForEvent = async (req, res) => {
       await unregisterForEventService(eventId, userId);
       res.status(200).json({ message: "Successfully unregistered"});
 
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
     res.status(400).json({ error: "failed to unregister from event"})
     }
-  }
-
-
-export const getEventById = async (req, res) => {
-  try {
-    const eventId = req.params.event_id;
-
-    const event = await getEventByIdService(eventId);
-    res.status(200).json(event);
-
-  } catch (error) {
-    console.log("Error fetching the event", error);
-    res.status(500).json({error: "Failed to fetch an event"});
-  }
-}
+  
+};
