@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -21,7 +22,8 @@ import { fetchEvents } from '../services/api';
 // import cardImg from '../assets/trail.jpg'; // unused
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
-const Events = () => {  
+const Events = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -327,7 +329,8 @@ const Events = () => {
                         <Button
                           variant="contained"
                           size="small"
-                          color="primary"                          
+                          color="primary"
+                          onClick={() => navigate(`/events/${event.event_id}`)}
                         >
                           View Details
                         </Button>
