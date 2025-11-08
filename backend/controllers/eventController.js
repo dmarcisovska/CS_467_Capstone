@@ -102,6 +102,7 @@ export const unregisterForEvent = async (req, res) => {
       await unregisterForEventService(eventId, userId);
       res.status(200).json({ message: "Successfully unregistered"});
 
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
     res.status(400).json({ error: "failed to unregister from event"})
     }

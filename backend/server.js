@@ -35,7 +35,6 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api/user", userRoutes(pool));
 app.use("/api/events", eventRoutes);
 app.use("/api/raceday", racedayRoutes);
 
