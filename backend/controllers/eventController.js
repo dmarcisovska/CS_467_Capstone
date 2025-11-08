@@ -1,4 +1,4 @@
-import { getEventsService, getFeaturedEventsService, registerForEventService, unregisterForEventService } from "../services/eventService.js"
+import { getEventsService, getFeaturedEventsService, registerForEventService, unregisterForEventService, getEventByIdService } from "../services/eventService.js"
 
 
 
@@ -56,3 +56,17 @@ export const unregisterForEvent = async (req, res) => {
     res.status(400).json({ error: "failed to unregister from event"})
     }
   }
+
+
+export const getEventById = async (req, res) => {
+  try {
+    const eventId = req.params.event_id;
+
+    const event = await getEventByIdService(eventId);
+    res.status(200).json(event);
+
+  } catch (error) {
+    console.log("Error fetching the event", error);
+    res.status(500).json({error: "Failed to fetch an event"});
+  }
+}

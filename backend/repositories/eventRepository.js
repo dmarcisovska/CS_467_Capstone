@@ -140,3 +140,21 @@ export const unregisterForEventRepository = async (eventId, userId) => {
   const { rows } = await pool.query(query, [eventId, userId]);
   return rows[0];
 }
+
+
+
+export const getEventByIdRepository = async (eventId) => {
+  try {
+  const query = `SELECT e.*
+                  FROM events e
+                  WHERE e.event_id = $1`;
+  
+  const result = await pool.query(query, [eventId]);
+
+  return result.rows[0] || null;
+
+} catch(error) {
+  console.error("Error in event repository", error.message);
+  throw error;
+  }
+}

@@ -1,5 +1,5 @@
 import express from "express";
-import { getEvents, getFeaturedEvents, registerForEvent, unregisterForEvent } from '../controllers/eventController.js';
+import { getEvents, getFeaturedEvents, registerForEvent, unregisterForEvent, getEventById } from '../controllers/eventController.js';
 
 const router = express.Router();
 // Base Url: '/api/events/'
@@ -11,4 +11,7 @@ router.get("/", getEvents)
 router.get("/featuredevents", getFeaturedEvents)
 router.post("/:eventId/register", registerForEvent)
 router.delete("/:eventId/register/:userId", unregisterForEvent)
+router.get("/:event_id", getEventById)
+
+
 export default router;

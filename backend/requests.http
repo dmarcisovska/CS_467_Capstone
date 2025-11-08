@@ -144,3 +144,10 @@ Content-Type: application/json
 
 ### DELETE Unregister for an event
 DELETE http://localhost:8080/api/events/5/register/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+
+
+
+
+### GET single event
+GET http://localhost:8080/api/events/5
+Accept: application/json
