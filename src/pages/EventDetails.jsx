@@ -182,16 +182,8 @@ const EventDetails = () => {
           Back to Events
         </Button>
 
- {/* <Typography variant="h3" gutterBottom>Countdown to Race Day</Typography> */}
             {timeLeft && !timeLeft.isPast && (
               <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 3, borderRadius: 2, mb: 4 }}>
-                {/* <Typography 
-                  variant="h3" 
-                  gutterBottom 
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}
-                >Race Countdown
-  
-                </Typography> */}
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 2 }}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h3" fontWeight="bold">
@@ -228,7 +220,6 @@ const EventDetails = () => {
             )}
 
         <Paper sx={{ p: 4, position: 'relative' }}>
-          {/* Chips in upper right corner */}
           <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {event.difficulty && (
               <Chip
@@ -322,15 +313,14 @@ const EventDetails = () => {
               </Stack>
             </Box>
 
-            {/* Sponsors & Prizes Section */}
-            {event.sponsors && event.sponsors.length > 0 && event.sponsors.some(s => s.sponsor_name || s.prize_description) && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  Sponsors & Prizes
-                </Typography>
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Sponsors & Prizes
+              </Typography>
+              {event.sponsors && event.sponsors.length > 0 && event.sponsors.some(s => s.sponsor_name || s.prize_description) ? (
                 <Stack spacing={2}>
                   {event.sponsors
-                    .filter(sponsor => sponsor.sponsor_name || sponsor.prize_description) // Show if has name OR prize
+                    .filter(sponsor => sponsor.sponsor_name || sponsor.prize_description)
                     .map((sponsor, index) => (
                       <Paper key={index} sx={{ p: 2, bgcolor: 'grey.50' }}>
                         {sponsor.sponsor_name && (
@@ -346,8 +336,12 @@ const EventDetails = () => {
                       </Paper>
                     ))}
                 </Stack>
-              </Box>
-            )}
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No sponsors or prizes for this event
+                </Typography>
+              )}
+            </Box>
 
             {event.volunteers && event.volunteers.length > 0 && (
               <Box>
