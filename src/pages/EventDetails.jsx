@@ -26,6 +26,7 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
+  const [address, setAddress] = useState('');
 
   useEffect(() => {
     loadEvent();
@@ -45,6 +46,19 @@ const EventDetails = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (event?.latitude && event?.longitude) {
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${event.latitude},${event.longitude}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.results && data.results[0]) {
+            setAddress(data.results[0].formatted_address);
+          }
+        })
+        .catch(err => console.error('Error getting address:', err));
+    }
+  }, [event]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -265,16 +279,23 @@ const EventDetails = () => {
                 Location
               </Typography>
               {event.latitude && event.longitude ? (
-                <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', height: 400 }}>
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    style={{ border: 0 }}
-                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${event.latitude},${event.longitude}&zoom=15`}
-                    allowFullScreen
-                  />
-                </Box>
+                <>
+                  {address && (
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                      {address}
+                    </Typography>
+                  )}
+                  <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', height: 400 }}>
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${event.latitude},${event.longitude}&zoom=15`}
+                      allowFullScreen
+                    />
+                  </Box>
+                </>
               ) : (
                 <Typography variant="body1">Location not specified</Typography>
               )}
