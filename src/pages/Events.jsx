@@ -18,7 +18,7 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import titleImg from '../assets/gigi-bIpKSEsaN6Q-unsplash.jpg';
 import { fetchEvents } from '../services/api';
-import cardImg from '../assets/trail.jpg';
+// import cardImg from '../assets/trail.jpg'; // unused
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const Events = () => {
@@ -55,9 +55,9 @@ const Events = () => {
     }
   }, []);
 
-  const loadEvents = useCallback(async () => {
+  const loadEvents = useCallback(async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isBackgroundRefresh) setLoading(true);
       setError(null);
       
       console.log('Loading events with location:', userLocation);
@@ -72,11 +72,25 @@ const Events = () => {
       console.log('Events received:', data);
       console.log('First event distance:', data[0]?.distance_miles);
       
-      setEvents(data);
+      if (isBackgroundRefresh) {
+        setEvents(prevEvents => {
+          
+          // compare data to prevent unnecessary re-renders
+          if (JSON.stringify(prevEvents) === JSON.stringify(data)) {
+            return prevEvents; // prevents re-render
+          }
+          return data;
+        });
+
+      } else {
+        setEvents(data);
+      }
+
     } catch (err) {
+      console.error('Failed to load events: ', err); // or unset err in catch
       setError('Failed to load events. Please try again later.');
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) setLoading(false);
     }
   }, [sortBy, dateFilter, userLocation]);
 
@@ -100,9 +114,23 @@ const Events = () => {
     return colors[difficulty] || 'default';
   };
 
+  // Initial event data fetch on page load
   useEffect(() => {
-    loadEvents();
+    loadEvents(false); // not a background refresh
   }, [loadEvents]); 
+
+  // Background refresh
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!document.hidden) { // do not refresh if tab is inactive
+        loadEvents(true);
+      }
+    }, 30000 ); // 30000ms = 30 seconds
+
+    // Cleanup between background refreshes
+    // Helps avoids memory leak and duplication issues
+    return () => clearInterval(intervalId);
+  }, [loadEvents]);
 
   return (
     <>
