@@ -32,7 +32,6 @@ export default pool
 app.get("/", (req, res) => {
     res.json({ message: "test deploy 6" });
 });
-export default pool;
 
 // Routes
 app.use("/api/user", userRoutes(pool));
