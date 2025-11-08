@@ -322,6 +322,110 @@ const EventDetails = () => {
               </Stack>
             </Box>
 
+            {event.sponsors && event.sponsors.length > 0 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Sponsors & Prizes
+                </Typography>
+                <Stack spacing={2}>
+                  {event.sponsors.map((sponsor, index) => (
+                    <Paper key={index} sx={{ p: 2, bgcolor: 'grey.50' }}>
+                      <Typography variant="body1" fontWeight={600}>
+                        {sponsor.sponsor_name}
+                      </Typography>
+                      {sponsor.prize_description && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          Prize: {sponsor.prize_description}
+                        </Typography>
+                      )}
+                    </Paper>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {event.volunteers && event.volunteers.length > 0 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Event Officials & Volunteers
+                </Typography>
+                <Stack spacing={2}>
+                  {event.volunteers.filter(v => v.role === 'Starting Official').length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle2" color="primary" gutterBottom>
+                        Starting Officials
+                      </Typography>
+                      <Stack spacing={0.5}>
+                        {event.volunteers
+                          .filter(v => v.role === 'Starting Official')
+                          .map((volunteer, index) => (
+                            <Typography key={index} variant="body2">
+                              • {volunteer.username}
+                            </Typography>
+                          ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {event.volunteers.filter(v => v.role === 'Finish Line Official').length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle2" color="primary" gutterBottom>
+                        Finish Line Officials
+                      </Typography>
+                      <Stack spacing={0.5}>
+                        {event.volunteers
+                          .filter(v => v.role === 'Finish Line Official')
+                          .map((volunteer, index) => (
+                            <Typography key={index} variant="body2">
+                              • {volunteer.username}
+                            </Typography>
+                          ))}
+                      </Stack>
+                    </Box>
+                  )}
+                  {event.volunteers.filter(v => v.role === 'Volunteer').length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle2" color="primary" gutterBottom>
+                        Volunteers
+                      </Typography>
+                      <Stack spacing={0.5}>
+                        {event.volunteers
+                          .filter(v => v.role === 'Volunteer')
+                          .map((volunteer, index) => (
+                            <Typography key={index} variant="body2">
+                              • {volunteer.username}
+                            </Typography>
+                          ))}
+                      </Stack>
+                    </Box>
+                  )}
+                </Stack>
+              </Box>
+            )}
+
+            {event.roles && event.roles.length > 0 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Volunteer Opportunities
+                </Typography>
+                <Stack spacing={1}>
+                  {event.roles.map((role, index) => (
+                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2">
+                        {role.role}
+                      </Typography>
+                      <Chip 
+                        label={`${role.current_count || 0}/${role.role_limit} filled`}
+                        size="small"
+                        color={role.current_count >= role.role_limit ? 'error' : 'success'}
+                        variant="outlined"
+                      />
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
             <Box sx={{ pt: 2 }}>
               <Button
                 variant="contained"
