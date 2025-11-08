@@ -70,6 +70,42 @@ GET http://localhost:8080/api/events?minParticipants=4
 Accept: application/json
 
 
+### CREATE a new event
+POST http://localhost:8080/api/events
+Content-Type: application/json
+
+{
+  "creator_user_id": "8a8d4e4a-e6ed-40ad-b710-12731853c91b",
+  "name": "Sunset Beach Run",
+  "description": "A relaxing evening run along the beach at sunset. Great for all skill levels!",
+  "event_datetime": "2025-12-20T18:00:00.000Z",
+  "latitude": 47.6062,
+  "longitude": -122.3321,
+  "distance": 6.2,
+  "elevation": 25,
+  "difficulty": "Easy"
+}
+
+### GET a specific event using event_id
+GET http://localhost:8080/api/events/9
+Content-Type: application/json
+
+### UPDATE an existing event
+PUT http://localhost:8080/api/events/9
+Content-Type: application/json
+Accept: application/json
+
+{
+  "creator_user_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+  "name": "Test Update 3",
+  "event_datetime": "2025-11-15T09:00:00.000Z"
+
+}
+
+### DELETE an event
+DELETE http://localhost:8080api/events/8
+Content-Type: application/json
+
 
 
 // Test for Featured Events
@@ -89,16 +125,28 @@ Accept: application/json
 // User API HTTP test requests
 // I used ChatGPT for help with generating and troubleshooting these.
 
-### GET Specific user using user_id
-GET http://localhost:8080/api/user/profile/25f4c68d-092e-4b53-b70d-15f670a9695e
-Accept: application/json
-
-### PUT Update password for specific user
-PUT http://localhost:8080/api/user/profile/25f4c68d-092e-4b53-b70d-15f670a9695e
+### Login as user
+POST http://localhost:8080/api/user/login
 Content-Type: application/json
-Accept: application/json
 
 {
+  "email": "ha@test2.com",
+  "password": "password123"
+}
+
+### GET Specific user using user_id
+GET http://localhost:8080/api/user/profile/52b96efc-3ce3-455c-aeac-8bd9efdc5b58
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTJiOTZlZmMtM2NlMy00NTVjLWFlYWMtOGJkOWVmZGM1YjU4IiwiZW1haWwiOiJoYUB0ZXN0Mi5jb20iLCJpYXQiOjE3NjE1NDE1MzcsImV4cCI6MTc2MjE0NjMzN30.TD4W9F2U0urm4WpmwrZN-sMzIgv42oS2zBZ_KqYWNyI
+
+### PUT Update password for specific user
+PUT http://localhost:8080/api/user/profile/52b96efc-3ce3-455c-aeac-8bd9efdc5b58
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTJiOTZlZmMtM2NlMy00NTVjLWFlYWMtOGJkOWVmZGM1YjU4IiwiZW1haWwiOiJoYUB0ZXN0Mi5jb20iLCJpYXQiOjE3NjE1NDE1MzcsImV4cCI6MTc2MjE0NjMzN30.TD4W9F2U0urm4WpmwrZN-sMzIgv42oS2zBZ_KqYWNyI
+
+{
+  "username": "new_ha_test_2",
 	"password": "newpassword123"
 }
 
@@ -112,9 +160,9 @@ Content-Type: application/json
 Accept: application/json 
 
 { 
-  "email": "test3@test3.com", 
+  "email": "test5@test5.com", 
   "password": "password123", 
-  "username": "test_3" 
+  "username": "test_5" 
 }
 
 ### POST Login with existing user

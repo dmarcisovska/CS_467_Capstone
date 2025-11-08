@@ -7,6 +7,7 @@ const { Pool } = pg;
 
 import eventRoutes from "./routes/eventRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import authenticateToken from "./middleware/auth.js";
 import racedayRoutes from "./routes/racedayRoutes.js";
 import geocodeRoutes from "./routes/geocodeRoutes.js";
 
@@ -34,7 +35,6 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api/user", userRoutes(pool));
 app.use("/api/events", eventRoutes);
 app.use("/api/raceday", racedayRoutes);
 
@@ -49,7 +49,14 @@ pool.query("SELECT NOW()", (err) => {
 });
 
 app.use("/api/events", eventRoutes);
-app.use("/api/user", userRoutes(pool));
+
+// authenication
+const authMiddleware = authenticateToken(pool);
+
+// user routes
+// this has the authentication logic for now
+app.use("/api/user", userRoutes(pool, authMiddleware));
+
 app.use("/api/geocode", geocodeRoutes);
 
 app.listen(PORT, () => {
