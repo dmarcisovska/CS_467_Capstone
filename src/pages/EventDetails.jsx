@@ -208,7 +208,7 @@ const EventDetails = () => {
             )}
 
             {timeLeft?.isPast && (
-              <Alert severity="info">
+              <Alert severity="info" sx={{ mb: 4 }}>
                 This event has already taken place.
               </Alert>
             )}
