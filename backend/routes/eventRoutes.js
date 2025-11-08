@@ -1,5 +1,5 @@
 import express from "express";
-import { getEventById, getEvents, getFeaturedEvents } from '../controllers/eventController.js';
+import { getEvents, getFeaturedEvents, registerForEvent, unregisterForEvent } from '../controllers/eventController.js';
 
 const router = express.Router();
 // Base Url: '/api/events/'
@@ -9,6 +9,6 @@ const router = express.Router();
 //          /api/events/?sortBy=date  - > gets all events sorted by date
 router.get("/", getEvents)
 router.get("/featuredevents", getFeaturedEvents)
-router.get("/:event_id", getEventById)
-
+router.post("/:eventId/register", registerForEvent)
+router.delete("/:eventId/register/:userId", unregisterForEvent)
 export default router;

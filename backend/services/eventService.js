@@ -13,20 +13,23 @@ export const getFeaturedEventsService = async () => {
 };
 
 
-export const getEventByIdService = async (eventId) => {
+export const registerForEventService = async (eventId, userId, role) => {
   try {
-    const eventObj = await eventRepository.getEventByIdRepository(eventId);
-
-    if (!eventObj) {
-       const error = new Error(`Unable to find event: ${eventId}`);
-       error.status = 404;
-       throw error;
-    }
-
-    return eventObj;
-
+    return await eventRepository.registerForEventRepository(eventId, userId, role);
   } catch (error) {
-    console.error("Error in service layer", error.message);
+      const err = new Error("User already registered")
+      err.status = 409
+      throw err;
+       
+  }
+
+}
+
+export const unregisterForEventService = async (eventId, userId) => {
+  const deleteRow = await eventRepository.unregisterForEventRepository(eventId, userId);
+  if (!deleteRow) {
+    const error = new Error("User was not registered for the event")
+    error.status = 404;
     throw error;
   }
-} 
+}
