@@ -264,13 +264,20 @@ const EventDetails = () => {
                 <LocationOnIcon fontSize="small" color="primary" />
                 Location
               </Typography>
-              <Typography variant="body1">
-                {event.latitude && event.longitude ? (
-                  <>Coordinates: {event.latitude.toFixed(4)}, {event.longitude.toFixed(4)}</>
-                ) : (
-                  'Location not specified'
-                )}
-              </Typography>
+              {event.latitude && event.longitude ? (
+                <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', height: 400 }}>
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    style={{ border: 0 }}
+                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${event.latitude},${event.longitude}&zoom=15`}
+                    allowFullScreen
+                  />
+                </Box>
+              ) : (
+                <Typography variant="body1">Location not specified</Typography>
+              )}
             </Box>
 
             <Box>
