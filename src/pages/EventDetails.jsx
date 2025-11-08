@@ -322,24 +322,29 @@ const EventDetails = () => {
               </Stack>
             </Box>
 
-            {event.sponsors && event.sponsors.length > 0 && (
+            {/* Sponsors & Prizes Section */}
+            {event.sponsors && event.sponsors.length > 0 && event.sponsors.some(s => s.sponsor_name || s.prize_description) && (
               <Box>
                 <Typography variant="h6" gutterBottom>
                   Sponsors & Prizes
                 </Typography>
                 <Stack spacing={2}>
-                  {event.sponsors.map((sponsor, index) => (
-                    <Paper key={index} sx={{ p: 2, bgcolor: 'grey.50' }}>
-                      <Typography variant="body1" fontWeight={600}>
-                        {sponsor.sponsor_name}
-                      </Typography>
-                      {sponsor.prize_description && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                          Prize: {sponsor.prize_description}
-                        </Typography>
-                      )}
-                    </Paper>
-                  ))}
+                  {event.sponsors
+                    .filter(sponsor => sponsor.sponsor_name || sponsor.prize_description) // Show if has name OR prize
+                    .map((sponsor, index) => (
+                      <Paper key={index} sx={{ p: 2, bgcolor: 'grey.50' }}>
+                        {sponsor.sponsor_name && (
+                          <Typography variant="body1" fontWeight={600}>
+                            {sponsor.sponsor_name}
+                          </Typography>
+                        )}
+                        {sponsor.prize_description && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: sponsor.sponsor_name ? 0.5 : 0 }}>
+                            {sponsor.sponsor_name ? 'Prize: ' : ''}{sponsor.prize_description}
+                          </Typography>
+                        )}
+                      </Paper>
+                    ))}
                 </Stack>
               </Box>
             )}
