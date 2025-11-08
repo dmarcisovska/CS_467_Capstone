@@ -10,6 +10,7 @@ import Events from './pages/Events';
 import Create from './pages/Create';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import EventDetails from './pages/EventDetails';
 
 function App() {
 
