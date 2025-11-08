@@ -1,0 +1,45 @@
+# CREATE QR CODE
+# =============================================================================
+### Create QR code
+# Expected 200 OK: SVG code
+GET http://localhost:8080/api/raceday/make-qr?event=1&user=d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44
+
+### TEST: Missing QR code parameter (no user)
+GET http://localhost:8080/api/raceday/make-qr?event=1
+
+### TEST: Invalid QR code parameter (user misspelled)
+GET http://localhost:8080/api/raceday/make-qr?event=1&userr=d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44
+
+
+# UPDATE START TIME
+# =============================================================================
+### Set start time for event 
+# Expected 200 OK: Start time recorded successfully
+PATCH http://localhost:8080/api/raceday/set-start-time?event=1
+
+### TEST: Duplicate PATCH request
+# Expected 409 Conflict: Start time already recorded
+PATCH http://localhost:8080/api/raceday/set-start-time?event=1
+
+### TEST: Invalid event
+# Expected 404 Not Found: Event not found
+PATCH http://localhost:8080/api/raceday/set-start-time?event=99
+
+
+# UPDATE FINISH TIME
+# =============================================================================
+### Set finish time for racer
+# Expected 200 OK: Finish time recorded successfully
+GET http://localhost:8080/api/raceday/set-finish-time?event=1&user=d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44
+
+### TEST: Duplicate GET request
+# Expected 409 Conflict: Finish time already recorded
+GET http://localhost:8080/api/raceday/set-finish-time?event=1&user=d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44
+
+### TEST: Invalid event
+# Expected 404 Not Found: Registration not found
+GET http://localhost:8080/api/raceday/set-finish-time?event=99&user=d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44
+
+### TEST: Invalid user
+# Expected 404 Not Found: Registration not found
+GET http://localhost:8080/api/raceday/set-finish-time?event=1&user=1

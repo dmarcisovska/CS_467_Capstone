@@ -152,19 +152,6 @@ export const createEventRepository = async(eventData) => {
   return rows;
 }
 
-export const getEventByIdRepository = async (eventId) => {
-  const query = `
-    SELECT e.*, COUNT(r.user_id) AS participant_count
-    FROM events e
-    LEFT JOIN registrations r ON e.event_id = r.event_id
-    WHERE e.event_id = $1
-    GROUP BY e.event_id
-  `;
-
-  const { rows } = await pool.query(query, [eventId]);
-  return rows;
-}
-
 export const updateEventRepository = async (eventId, newData) => {
   // COALESCE allows the code to use new data if it is not null
   const query = `
@@ -210,4 +197,41 @@ export const deleteEventRepository = async (eventId) => {
 
   const { rows} = await pool.query(query, [eventId]);
   return rows;
+}
+
+export const registerForEventRepository = async (eventId, userId, role) => {
+  const query = `
+  INSERT INTO registrations (event_id, user_id, role)
+  VALUES ($1, $2, $3)
+  RETURNING *;`
+  
+  const { rows } = await pool.query(query, [eventId, userId, role]);
+  return rows[0];
+}
+
+
+export const unregisterForEventRepository = async (eventId, userId) => {
+  const query = `
+  DELETE FROM registrations
+  WHERE event_id = $1 AND user_id = $2
+  RETURNING *`;
+  
+  const { rows } = await pool.query(query, [eventId, userId]);
+  return rows[0];
+}
+
+export const getEventByIdRepository = async (eventId) => {
+  try {
+  const query = `SELECT e.*
+                  FROM events e
+                  WHERE e.event_id = $1`;
+  
+  const result = await pool.query(query, [eventId]);
+
+  return result.rows[0] || null;
+
+} catch(error) {
+  console.error("Error in event repository", error.message);
+  throw error;
+  }
 }

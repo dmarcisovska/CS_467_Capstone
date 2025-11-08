@@ -1,5 +1,4 @@
-import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService } from "../services/eventService.js"
-
+import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService } from "../services/eventService.js"
 
 
 export const getEvents = async (req, res) => {
@@ -41,14 +40,14 @@ export const createEvent = async (req, res) => {
 
 export const getEventById = async (req, res) => {
   try {
-    const eventId = req.params.id;
+    const eventId = req.params.event_id;
 
     const event = await getEventByIdService(eventId);
-
     res.status(200).json(event);
+
   } catch (error) {
-    console.error("Error getting event by ID:", error);
-    res.status(500).json({ error: "Failed to retrieve"});
+    console.log("Error fetching the event", error);
+    res.status(500).json({error: "Failed to fetch an event"});
   }
 }
 
@@ -75,6 +74,36 @@ export const deleteEvent = async (req, res) => {
   } catch (error) {
     console.error("Error deleting event by ID:", error);
     res.status(500).json({ error: "Failed to delete"});
-    
   }
-}
+};
+    
+
+export const registerForEvent = async (req, res) => {
+    const { eventId } = req.params;
+    const {user_id, role} = req.body;
+
+    try {
+      const result = await registerForEventService(eventId, user_id, role)
+      return res.status(201).json(result)
+    } catch (error) {
+      console.error("Register error:", error);
+
+      return res.status(error.status = 400).json({
+      error: error.message = "Already registered for this event"
+    });
+  }
+};
+
+export const unregisterForEvent = async (req, res) => {
+  const { eventId, userId } = req.params;
+
+
+  try {
+      await unregisterForEventService(eventId, userId);
+      res.status(200).json({ message: "Successfully unregistered"});
+
+    } catch (error) {
+    res.status(400).json({ error: "failed to unregister from event"})
+    }
+  
+};
