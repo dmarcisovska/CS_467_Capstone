@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -18,7 +18,8 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import titleImg from '../assets/gigi-bIpKSEsaN6Q-unsplash.jpg';
 import { fetchEvents } from '../services/api';
-import cardImg from '../assets/trail.jpg';
+// import cardImg from '../assets/trail.jpg'; // unused
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -26,20 +27,72 @@ const Events = () => {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
 
-  const loadEvents = async () => {
+
+  useEffect(() => {
+    console.log('Requesting geolocation...');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('Got position:', position.coords);
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        
+          loadEvents();
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setLocationError('Cant retrieve user location');
+        }
+      );
+    } else {
+      console.error('Geolocation not supported');
+      setLocationError('Geolocation not supported by browser');
+    }
+  }, []);
+
+  const loadEvents = useCallback(async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isBackgroundRefresh) setLoading(true);
       setError(null);
-      const data = await fetchEvents({ sortBy, dateFilter });
-      setEvents(data);
-      console.log('Events loaded:', data);
+      
+      console.log('Loading events with location:', userLocation);
+      
+      const data = await fetchEvents({
+        sortBy,
+        dateFilter,
+        lat: userLocation?.lat,
+        lng: userLocation?.lng,
+      });
+      
+      console.log('Events received:', data);
+      console.log('First event distance:', data[0]?.distance_miles);
+      
+      if (isBackgroundRefresh) {
+        setEvents(prevEvents => {
+          
+          // compare data to prevent unnecessary re-renders
+          if (JSON.stringify(prevEvents) === JSON.stringify(data)) {
+            return prevEvents; // prevents re-render
+          }
+          return data;
+        });
+
+      } else {
+        setEvents(data);
+      }
+
     } catch (err) {
+      console.error('Failed to load events: ', err); // or unset err in catch
       setError('Failed to load events. Please try again later.');
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) setLoading(false);
     }
-  };
+  }, [sortBy, dateFilter, userLocation]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -61,9 +114,23 @@ const Events = () => {
     return colors[difficulty] || 'default';
   };
 
+  // Initial event data fetch on page load
   useEffect(() => {
-    loadEvents();
-  }, [sortBy, dateFilter]);
+    loadEvents(false); // not a background refresh
+  }, [loadEvents]); 
+
+  // Background refresh
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!document.hidden) { // do not refresh if tab is inactive
+        loadEvents(true);
+      }
+    }, 30000 ); // 30000ms = 30 seconds
+
+    // Cleanup between background refreshes
+    // Helps avoids memory leak and duplication issues
+    return () => clearInterval(intervalId);
+  }, [loadEvents]);
 
   return (
     <>
@@ -119,6 +186,9 @@ const Events = () => {
             <MenuItem value="">None</MenuItem>
             <MenuItem value="date">Date (Soonest First)</MenuItem>
             <MenuItem value="participants">Most Participants</MenuItem>
+            {userLocation && (
+              <MenuItem value="distance">Distance (Nearest First)</MenuItem>
+            )}
           </TextField>
 
           <TextField
@@ -134,6 +204,18 @@ const Events = () => {
             <MenuItem value="month">This Month</MenuItem>
           </TextField>
         </Stack>
+
+        {locationError && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {locationError}. Distance sorting unavailable.
+          </Alert>
+        )}
+
+        {!userLocation && !locationError && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Enable location to see distances and sort by nearest events.
+          </Alert>
+        )}
 
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
@@ -151,7 +233,7 @@ const Events = () => {
           <>
             {events.length === 0 ? (
               <Typography variant="h6" sx={{ textAlign: 'center', py: 8 }}>
-                No events found. Try adjusting your filters.
+                No events found with your search criteria. 
               </Typography>
             ) : (
               <Box
@@ -195,6 +277,15 @@ const Events = () => {
                             <strong>Date:</strong>{' '}
                             {formatDate(event.event_datetime)}
                           </Typography>
+
+                          {event.distance_miles && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <LocationOnIcon fontSize="small" color="primary" />
+                              <Typography variant="body2">
+                                <strong>{Math.round(event.distance_miles)}</strong> miles away
+                              </Typography>
+                            </Box>
+                          )}
 
                           <Typography variant="body2">
                             <strong>Distance:</strong> {event.distance} miles
