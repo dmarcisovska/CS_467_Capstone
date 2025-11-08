@@ -313,24 +313,25 @@ const EventDetails = () => {
               </Stack>
             </Box>
 
+            {/* Sponsors & Prizes Section - Always show heading */}
             <Box>
               <Typography variant="h6" gutterBottom>
                 Sponsors & Prizes
               </Typography>
-              {event.sponsors && event.sponsors.length > 0 && event.sponsors.some(s => s.sponsor_name || s.prize_description) ? (
+              {event.sponsors && event.sponsors.length > 0 && event.sponsors.some(s => s.sponsor || s.prize) ? (
                 <Stack spacing={2}>
                   {event.sponsors
-                    .filter(sponsor => sponsor.sponsor_name || sponsor.prize_description)
-                    .map((sponsor, index) => (
-                      <Paper key={index} sx={{ p: 2, bgcolor: 'grey.50' }}>
-                        {sponsor.sponsor_name && (
+                    .filter(s => s.sponsor || s.prize)
+                    .map((sponsorData) => (
+                      <Paper key={sponsorData.id} sx={{ p: 2, bgcolor: 'grey.50' }}>
+                        {sponsorData.sponsor && (
                           <Typography variant="body1" fontWeight={600}>
-                            {sponsor.sponsor_name}
+                            {sponsorData.sponsor}
                           </Typography>
                         )}
-                        {sponsor.prize_description && (
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: sponsor.sponsor_name ? 0.5 : 0 }}>
-                            {sponsor.sponsor_name ? 'Prize: ' : ''}{sponsor.prize_description}
+                        {sponsorData.prize && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: sponsorData.sponsor ? 0.5 : 0 }}>
+                            {sponsorData.sponsor ? 'Prize: ' : ''}{sponsorData.prize}
                           </Typography>
                         )}
                       </Paper>
