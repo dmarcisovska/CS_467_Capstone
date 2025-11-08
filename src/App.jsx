@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import './App.css'
 import '@fontsource/roboto/300.css';
@@ -10,6 +9,7 @@ import Home from './pages/Home'
 import Events from './pages/Events';
 import Create from './pages/Create';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
 
@@ -22,6 +22,7 @@ function App() {
         <Route path='/events' element={<Events />} />
         <Route path='/create' element={<Create />} />
         <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
       </Routes>
     </>
   )
