@@ -320,27 +320,48 @@ const EventDetails = () => {
                 Sponsors & Prizes
               </Typography>
               {event.sponsors && event.sponsors.length > 0 && event.sponsors.some(s => s.sponsor || s.prize) ? (
-                <Stack spacing={2}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                  }}
+                >
                   {event.sponsors
                     .filter(s => s.sponsor || s.prize)
                     .map((sponsorData) => (
-                      <Paper key={sponsorData.id} sx={{ p: 2, bgcolor: 'grey.50' }}>
-                        {sponsorData.sponsor && (
-                          <>
+                      <Box
+                        key={sponsorData.id}
+                        sx={{
+                          flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 11px)' },
+                          display: 'flex',
+                        }}
+                      >
+                        <Paper sx={{ 
+                          p: 2, 
+                          bgcolor: 'grey.50',
+                          flexGrow: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          textAlign: 'center'
+                        }}>
                           <EmojiEventsIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-                          <Typography variant="body1" fontWeight={600}>
-                            {sponsorData.sponsor}
-                          </Typography>
-                          </>
-                        )}
-                        {sponsorData.prize && (
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: sponsorData.sponsor ? 0.5 : 0 }}>
-                            {sponsorData.sponsor ? 'Prize: ' : ''}{sponsorData.prize}
-                          </Typography>
-                        )}
-                      </Paper>
+                          {sponsorData.sponsor && (
+                            <Typography variant="body1" fontWeight={600}>
+                              {sponsorData.sponsor}
+                            </Typography>
+                          )}
+                          {sponsorData.prize && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: sponsorData.sponsor ? 0.5 : 0 }}>
+                              {sponsorData.sponsor ? 'Prize: ' : ''}{sponsorData.prize}
+                            </Typography>
+                          )}
+                        </Paper>
+                      </Box>
                     ))}
-                </Stack>
+                </Box>
               ) : (
                 <Typography variant="body2" color="text.secondary">
                   No sponsors or prizes for this event
