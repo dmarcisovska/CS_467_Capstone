@@ -14,6 +14,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
 import { fetchEventById } from '../services/api';
 
@@ -24,6 +25,7 @@ const EventDetails = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(null);
 
   useEffect(() => {
     loadEvent();
@@ -43,6 +45,39 @@ const EventDetails = () => {
       setLoading(false);
     }
   };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!event?.event_datetime) return;
+
+    const calculateTimeLeft = () => {
+      const eventDate = new Date(event.event_datetime);
+      const now = new Date();
+      const difference = eventDate - now;
+
+      if (difference <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
+      }
+
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+        isPast: false,
+      };
+    };
+
+    // Initial calculation
+    setTimeLeft(calculateTimeLeft());
+
+    // Update every second
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [event]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -133,9 +168,69 @@ const EventDetails = () => {
           Back to Events
         </Button>
 
+ {/* <Typography variant="h3" gutterBottom>Countdown to Race Day</Typography> */}
+            {timeLeft && !timeLeft.isPast && (
+              <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 3, borderRadius: 2, mb: 4 }}>
+                {/* <Typography 
+                  variant="h3" 
+                  gutterBottom 
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}
+                >Race Countdown
+  
+                </Typography> */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 2 }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h3" fontWeight="bold">
+                      {timeLeft.days}
+                    </Typography>
+                    <Typography variant="body2">Days</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h3" fontWeight="bold">
+                      {timeLeft.hours}
+                    </Typography>
+                    <Typography variant="body2">Hours</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h3" fontWeight="bold">
+                      {timeLeft.minutes}
+                    </Typography>
+                    <Typography variant="body2">Minutes</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h3" fontWeight="bold">
+                      {timeLeft.seconds}
+                    </Typography>
+                    <Typography variant="body2">Seconds</Typography>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {timeLeft?.isPast && (
+              <Alert severity="info">
+                This event has already taken place.
+              </Alert>
+            )}
+
         <Paper sx={{ p: 4 }}>
           <Stack spacing={4}>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            
+
+          
+
+           
+
+            <Box>
+              <Typography variant="h3" gutterBottom fontWeight={400}>
+                About This Race
+              </Typography>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                {event.description || 'No description available.'}
+              </Typography>
+            </Box>
+
+             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               {event.difficulty && (
                 <Chip
                   label={event.difficulty}
@@ -152,22 +247,12 @@ const EventDetails = () => {
             </Box>
 
             <Box>
-              <Typography variant="h5" gutterBottom fontWeight={600}>
-                About This Race
-              </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
-                {event.description || 'No description available.'}
-              </Typography>
-            </Box>
-
-            {/* Date & Time */}
-            <Box>
               <Typography 
                 variant="h6" 
                 gutterBottom 
                 sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
               >
-                <CalendarTodayIcon fontSize="small" />
+                <CalendarTodayIcon fontSize="small" color="primary" />
                 Date & Time
               </Typography>
               <Typography variant="body1">
@@ -181,7 +266,7 @@ const EventDetails = () => {
                 gutterBottom 
                 sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
               >
-                <LocationOnIcon fontSize="small" />
+                <LocationOnIcon fontSize="small" color="primary" />
                 Location
               </Typography>
               <Typography variant="body1">
@@ -199,7 +284,7 @@ const EventDetails = () => {
                 gutterBottom 
                 sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
               >
-                <TerrainIcon fontSize="small" />
+                <TerrainIcon fontSize="small" color="primary" />
                 Course Details
               </Typography>
               <Stack spacing={1}>
