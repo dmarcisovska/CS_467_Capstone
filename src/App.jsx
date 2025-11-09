@@ -10,6 +10,7 @@ import Events from './pages/Events';
 import Create from './pages/Create';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RaceDay from './pages/RaceDay';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path='/create' element={<Create />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/events/:id/raceday' element={<RaceDay />} />
       </Routes>
     </>
   )

@@ -43,3 +43,69 @@ export const fetchFeaturedEvents = async () => {
     throw error;
   }
 };
+
+export const generateQRCode = async (eventId, userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/raceday/make-qr?event=${eventId}&user=${userId}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to generate QR code');
+    }
+    
+    return await response.text();
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    throw error;
+  }
+};
+
+export const setStartTime = async (eventId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/raceday/set-start-time?event=${eventId}`, {
+      method: 'PATCH',
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to set start time');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error setting start time:', error);
+    throw error;
+  }
+};
+
+export const setFinishTime = async (eventId, userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/raceday/set-finish-time?event=${eventId}&user=${userId}`);
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to set finish time');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error setting finish time:', error);
+    throw error;
+  }
+};
+
+export const fetchEventById = async (eventId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch event');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    throw error;
+  }
+};
