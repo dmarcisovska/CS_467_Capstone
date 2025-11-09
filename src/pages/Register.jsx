@@ -104,8 +104,6 @@ const Register = () => {
         email: formData.email,
         password: formData.password,
         birthday: formData.birthday ? formData.birthday.format('YYYY-MM-DD') : null,
-        bio: null, 
-        location: null,
         avatar_url: formData.avatarUrl || null, // API not ready to handle images, have to make this optional for now
       };
 
