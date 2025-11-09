@@ -1,8 +1,52 @@
-import React from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import heroImage from '../assets/nature-run.jpg'; // ⬅️ update this path to your local image
+import React, { useState } from 'react';
+import { Box, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import heroImage from '../assets/nature-run.jpg';
+import { loginUser } from '../services/api';
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.email || !formData.password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await loginUser({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      console.log('Found user with matching password:', response);
+      
+      alert('Login successful!');
+      
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -16,7 +60,6 @@ const Login = () => {
         position: 'relative',
       }}
     >
-      {/* Dark overlay for readability */}
       <Box
         sx={{
           position: 'absolute',
@@ -25,8 +68,9 @@ const Login = () => {
         }}
       />
 
-      {/* Login form */}
       <Box
+        component="form"
+        onSubmit={handleSubmit}
         sx={{
           position: 'relative',
           zIndex: 1,
@@ -45,10 +89,21 @@ const Login = () => {
           Log in
         </Typography>
 
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <TextField
-          label="Username"
+          name="email"
+          label="Email"
+          type="email"
           variant="filled"
           fullWidth
+          value={formData.email}
+          onChange={handleChange}
+          required
           sx={{
             mb: 2,
             backgroundColor: 'rgba(255, 255, 255, 0.85)', 
@@ -56,19 +111,30 @@ const Login = () => {
           }}
         />
         <TextField
+          name="password"
           label="Password"
           type="password"
           variant="filled"
           fullWidth
-           sx={{
+          value={formData.password}
+          onChange={handleChange}
+          required
+          sx={{
             mb: 3,
             backgroundColor: 'rgba(255, 255, 255, 0.85)', 
             borderRadius: 1,
           }}
         />
 
-        <Button variant="contained" color="primary" fullWidth size="large">
-          Log in
+        <Button 
+          type="submit"
+          variant="contained" 
+          color="primary" 
+          fullWidth 
+          size="large"
+          disabled={submitting}
+        >
+          {submitting ? <CircularProgress size={24} /> : 'Log in'}
         </Button>
       </Box>
     </Box>
