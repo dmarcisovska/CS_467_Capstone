@@ -119,12 +119,65 @@ const RaceDay = () => {
     );
   }
 
-  // TODO: Replace with actual participants from event.volunteers filtered by role='Runner'
-  const participants = [
-    { user_id: 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44', username: 'john_doe', start_time: null, finish_time: null },
-    { user_id: 'e4eebc99-9c0b-4ef8-bb6d-6bb9bd380a55', username: 'jane_smith', start_time: '2024-01-15T09:00:00', finish_time: null },
-    { user_id: 'f5eebc99-9c0b-4ef8-bb6d-6bb9bd380a66', username: 'bob_jones', start_time: '2024-01-15T09:00:00', finish_time: '2024-01-15T10:30:00' },
-  ];
+  // Replace the mock participants with actual data from event
+  const participants = event.volunteers 
+    ? event.volunteers.filter(v => v.role === 'Runner')
+    : [];
+
+  // If no participants in volunteers, show message
+  if (participants.length === 0) {
+    return (
+      <>
+        <Box
+          sx={{
+            position: 'relative',
+            height: '400px',
+            backgroundImage: `url(${titleImg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            textAlign: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1,
+            }}
+          />
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{ position: 'relative', zIndex: 2, px: 2 }}
+          >
+            Race Day: {event.name}
+          </Typography>
+        </Box>
+
+        <Container sx={{ py: 4 }}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/events')}
+            sx={{ mb: 3 }}
+          >
+            Back to Events
+          </Button>
+
+          <Alert severity="info">
+            No participants registered as runners for this event yet.
+          </Alert>
+        </Container>
+      </>
+    );
+  }
 
   return (
     <>
