@@ -15,7 +15,7 @@ import {
 export const createRacerQrCode = async (req, res) => {
     try {
         const { event, user } = req.query;
-        const { currentUser } = req.user;
+        const currentUser = req.user.user_id;
 
         // Validate all inputs are provided
         if (!event || !user) {
@@ -32,8 +32,8 @@ export const createRacerQrCode = async (req, res) => {
             });
         }
         // Check if user has `Runner` role for the provided event
-        const isRunner = verifyUserEventRole(currentUser, event, ["Runner"]);
-        if (!isRunner) {
+        const isRole = await verifyUserEventRole(currentUser, event, ["Runner"]);
+        if (!isRole) {
             return res.status(403).json({ // Forbidden
                 error: "User must be a runner on the event"
             });
@@ -50,18 +50,21 @@ export const createRacerQrCode = async (req, res) => {
         res.status(500).json({ error: "Failed to generate QR code" });
     }
 }
+
 export const updateStartTime = async (req, res) => {
     try {
         const { event } = req.query;
-        const { currentUser } = req.user;
+        const currentUser = req.user.user_id;
         
         // Only Starting Officials can start races
-        const isRunner = verifyUserEventRole(
+        console.log(`verify if user=${currentUser} on event=${event}`);
+        const isRole = await verifyUserEventRole(
             currentUser,
             event,
             ["Starting Official"]
         );
-        if (!isRunner) {
+        console.log(`isRole=${isRole}`)
+        if (!isRole) {
             return res.status(403).json({ // Forbidden
                 error: "Only Starting Officials can start races"
             });
@@ -97,6 +100,7 @@ export const updateStartTime = async (req, res) => {
         });
     }
 }
+
 /**
  * Controller for updating a user's finish time for a given event.
  * 
@@ -106,15 +110,15 @@ export const updateStartTime = async (req, res) => {
 export const updateFinishTime = async (req, res) => {
     try {
         const { event, user } = req.query;
-        const { currentUser } = req.user;
+        const currentUser = req.user.user_id;
         
         // Only Finish Line Officials can record runners' finish times
-        const isRunner = verifyUserEventRole(
+        const isRole = await verifyUserEventRole(
             currentUser,
             event,
             ["Finish Line Official"]
         );
-        if (!isRunner) {
+        if (!isRole) {
             return res.status(403).json({ // Forbidden
                 error: "Only Finish Line Officials can record finish times"
             });

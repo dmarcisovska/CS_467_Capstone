@@ -34,10 +34,6 @@ app.get("/", (req, res) => {
     res.json({ message: "test deploy 6" });
 });
 
-// Routes
-app.use("/api/events", eventRoutes);
-app.use("/api/raceday", racedayRoutes);
-
 // Start server
 pool.query("SELECT NOW()", (err) => {
     if (err) {
@@ -48,15 +44,14 @@ pool.query("SELECT NOW()", (err) => {
     }
 });
 
-app.use("/api/events", eventRoutes);
-
 // authenication
 const authMiddleware = authenticateToken(pool);
 
 // user routes
 // this has the authentication logic for now
 app.use("/api/user", userRoutes(pool, authMiddleware));
-
+app.use("/api/raceday", racedayRoutes(pool));
+app.use("/api/events", eventRoutes);
 app.use("/api/geocode", geocodeRoutes);
 
 app.listen(PORT, () => {

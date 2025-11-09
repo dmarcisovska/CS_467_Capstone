@@ -12,7 +12,7 @@ export const checkUserEventRole = async (userId, eventId, role) => {
         const query = `
             SELECT EXISTS (
                 SELECT 1 
-                FROM event_registrations 
+                FROM registrations 
                 WHERE user_id = $1 
                 AND event_id = $2 
                 AND role = $3

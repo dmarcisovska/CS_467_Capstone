@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticateToken } from "../middleware/auth.js";
+import authenticateToken from "../middleware/auth.js";
 import {
     createRacerQrCode,
     updateStartTime,
@@ -8,10 +8,12 @@ import {
 
 const router = express.Router();
 
-router.get("/make-qr", authenticateToken, createRacerQrCode)
-router.patch("/set-start-time", authenticateToken, updateStartTime)
+export default function racedayRoutes(pool) {
+    const authMiddleware = authenticateToken(pool);
 
-// Uses GET instead of PATCH because QR codes trigger GET requests by default
-router.get("/set-finish-time", authenticateToken, updateFinishTime)
+    router.get("/make-qr", authMiddleware, createRacerQrCode);
+    router.patch("/set-start-time", authMiddleware, updateStartTime);
+    router.get("/set-finish-time", authMiddleware, updateFinishTime);
 
-export default router;
+    return router;
+}
