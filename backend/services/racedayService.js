@@ -18,8 +18,6 @@ export const updateStartTimeService = async (event) => {
     try {
         const eventStatus = await getEventRegistrationStatus(event);
 
-        console.log(eventStatus);
-
         // Check if the event exists
         if (!eventStatus || !eventStatus.event_exists) {
             throw new Error("Event not found");
