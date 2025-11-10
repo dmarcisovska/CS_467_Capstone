@@ -63,3 +63,35 @@ export const getEventByIdService = async (eventId) => {
     throw error;
   }
 } 
+
+export const getVolunteersForEventService = async (eventId) => {
+  try {
+    const volunteerList = await eventRepository.getVolunteerList(eventId);
+    return volunteerList
+  } catch (error) {
+    console.error("Error when retrieving volunteer list", error.message);
+    throw error;
+  }
+}
+
+export const getFinalistsService = async (eventId) => {
+
+  try {
+    const runners = await eventRepository.getFinalistListRepository(eventId);
+    return runners;
+  } catch (error) {
+    console.error("Error when retrieving finalist list", error);
+    throw error;
+  }
+}
+
+export const getRunnersService = async (eventId) => {
+
+  try {
+    const runners = await eventRepository.getRunnersListRepository(eventId)
+    return runners;
+  } catch (error) {
+    console.error("Error when retrieving runners list", error);
+    throw error;
+  }
+}

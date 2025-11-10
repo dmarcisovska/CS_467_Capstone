@@ -199,3 +199,18 @@ DELETE http://localhost:8080/api/events/5/register/a0eebc99-9c0b-4ef8-bb6d-6bb9b
 ### GET single event
 GET http://localhost:8080/api/events/5
 Accept: application/json
+
+
+### GET Event finished Finalists
+http://localhost:8080/api/events/6/finalists
+Accept: application/json
+
+
+### GET Event Volunteers
+http://localhost:8080/api/events/6/volunteers
+Accept: application/json
+
+
+### GET Event Runners
+http://localhost:8080/api/events/6/runners
+Accept: application/json
