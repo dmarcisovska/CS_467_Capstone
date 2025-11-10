@@ -1,5 +1,4 @@
-import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService, getVolunteersForEventService, getFinalistsService, getRunnersService } from "../services/eventService.js"
-
+import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService, getVolunteersForEventService, getFinalistsService, getRunnersService, getParticipantsService } from "../services/eventService.js"
 
 export const getEvents = async (req, res) => {
     try {
@@ -89,7 +88,7 @@ export const registerForEvent = async (req, res) => {
       console.error("Register error:", error);
 
       return res.status(error.status = 400).json({
-      error: error.message = "Already registered for this event"
+      error: error.message ?? "May have already registered for this event"
     });
   }
 };
@@ -129,12 +128,12 @@ export const getFinalists = async (req, res) => {
     const count = runners.length
     res.status(200).json({runners, count})
   } catch (error) {
-  console.error("Controller error retrieving finalists:", error);
-  res.status(400).json({ error: "failed to retrieve list of finalists for this event"})
+    console.error("Controller error retrieving finalists:", error);
+    res.status(400).json({ error: "failed to retrieve list of finalists for this event"})
 }
 }
 
-export const getAllRunners = async (req, res) => {
+export const getRunners = async (req, res) => {
   const { eventId } = req.params;
   
   try {
@@ -143,6 +142,18 @@ export const getAllRunners = async (req, res) => {
     res.status(200).json({runners, count})
   } catch (error) {
     console.error("Controller error retrieving runners:", error);
-  res.status(400).json({ error: "failed to retrieve list of runners for this event"})
+    res.status(400).json({ error: "failed to retrieve list of runners for this event"})
+  }
+}
+
+export const getParticipants = async (req, res) => {
+  const { eventId } = req.params;
+  try {
+    const participants = await getParticipantsService(eventId)
+    const count = participants.length
+    res.status(200).json({participants, count})
+  } catch (error) {
+    console.error("Error in controller when retrieving all participants for this event")
+    res.status(400).json({error: "failed to retrieve all participants"})
   }
 }

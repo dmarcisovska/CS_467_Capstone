@@ -212,5 +212,10 @@ Accept: application/json
 
 
 ### GET Event Runners
-http://localhost:8080/api/events/6/runners
+http://localhost:8080/api/events/2/runners
+Accept: application/json
+
+
+### GET Event Partcipants (all runners / volunteers)
+http://localhost:8080/api/events/2/participants
 Accept: application/json
