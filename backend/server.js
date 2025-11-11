@@ -10,6 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import authenticateToken from "./middleware/auth.js";
 import racedayRoutes from "./routes/racedayRoutes.js";
 import geocodeRoutes from "./routes/geocodeRoutes.js";
+import profilePictureRoutes from "./routes/profilePictureRoutes.js";
 
 const app = express();
 const PORT = 8080;
@@ -58,6 +59,9 @@ const authMiddleware = authenticateToken(pool);
 app.use("/api/user", userRoutes(pool, authMiddleware));
 
 app.use("/api/geocode", geocodeRoutes);
+
+// profile picture routes
+app.use("/api/profile-picture", profilePictureRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on ${BASE_URL}`);
