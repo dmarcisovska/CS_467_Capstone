@@ -15,9 +15,8 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { NavLink, useNavigate } from 'react-router-dom';
-import avatarImg from "../assets/denisa.jpeg"
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Profile', 'Logout'];
 
 const pages = [
   { text: 'Home', to: '/' },
@@ -208,9 +207,14 @@ function ResponsiveAppBar() {
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar 
-                      alt={user?.username} 
-                      src={user?.avatar_url || avatarImg} 
-                    />
+                      alt={user?.username}
+                      src={user?.avatar_url || undefined}
+                      sx={{
+                        bgcolor: user?.avatar_url ? 'transparent' : 'primary.main',
+                      }}
+                    >
+                      {!user?.avatar_url && user?.username?.[0]?.toLowerCase()}
+                    </Avatar>
                   </IconButton>
                 </Tooltip>
                 <Menu
