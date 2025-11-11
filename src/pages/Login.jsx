@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 import heroImage from '../assets/nature-run.jpg';
 import { loginUser } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -37,7 +39,14 @@ const Login = () => {
 
       console.log('Found user with matching password:', response);
       
-      alert('Login successful!');
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      // Dispatch custom event to notify Nav component
+      window.dispatchEvent(new Event('userLoggedIn'));
+      
+      // Redirect to events page
+      navigate('/events');
       
     } catch (err) {
       console.error('Login error:', err);
@@ -136,6 +145,26 @@ const Login = () => {
         >
           {submitting ? <CircularProgress size={24} /> : 'Log in'}
         </Button>
+
+        <Typography
+          variant="body2"
+          sx={{ mt: 2, color: 'white' }}
+        >
+          Don't have an account?{' '}
+          <Button 
+            href="/register" 
+            sx={{ 
+              textTransform: 'none', 
+              color: 'white',
+              textDecoration: 'underline',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              }
+            }}
+          >
+            Register here
+          </Button>
+        </Typography>
       </Box>
     </Box>
   );
