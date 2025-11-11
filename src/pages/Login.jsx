@@ -136,6 +136,26 @@ const Login = () => {
         >
           {submitting ? <CircularProgress size={24} /> : 'Log in'}
         </Button>
+
+        <Typography
+          variant="body2"
+          sx={{ mt: 2, color: 'white' }}
+        >
+          Don't have an account?{' '}
+          <Button 
+            href="/register" 
+            sx={{ 
+              textTransform: 'none', 
+              color: 'white',
+              textDecoration: 'underline',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              }
+            }}
+          >
+            Register here
+          </Button>
+        </Typography>
       </Box>
     </Box>
   );
