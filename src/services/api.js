@@ -44,6 +44,20 @@ export const fetchFeaturedEvents = async () => {
   }
 };
 
+export const fetchEventById = async (eventId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch event');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    throw error;
+  }
+};
 export const registerUser = async (userData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/user/register`, {
