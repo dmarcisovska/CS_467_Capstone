@@ -11,6 +11,7 @@ import Create from './pages/Create';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import EventDetails from './pages/EventDetails';
+import Profile from './pages/Profile';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path='/create' element={<Create />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/profile' element={<Profile />} />
       </Routes>
     </>
   )
