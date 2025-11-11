@@ -23,7 +23,6 @@ const pages = [
   { text: 'Home', to: '/' },
   { text: 'Events', to: '/events' },
   { text: 'Create Event', to: '/create' },
-  { text: 'Login', to: '/login' },
 ];
 
 function ResponsiveAppBar() {
