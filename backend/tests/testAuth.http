@@ -1,0 +1,28 @@
+### Login as test user
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "not-sam@very-real-email.com",
+  "password": "hellothere"
+}
+
+# User is registered for:
+# - Event 1 as Runner
+# - Event 2 as Starting Official
+# - Event 3 as Finish Line Official
+
+### HELPER: Register for an event
+POST  http://localhost:8080/api/events/3/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "user_id": "bd548303-62b7-4535-9bc1-f6a7f30aee19",
+  "role": "Finish Line Official"
+}
+
+### HELPER: Unregister from an event
+DELETE http://localhost:8080/api/events/2/register/bd548303-62b7-4535-9bc1-f6a7f30aee19
+
