@@ -111,15 +111,18 @@ const Create = () => {
     setSubmitting(true);
 
     try {
-      // Combine date and time into single datetime
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      
       const eventDateTime = formData.date
         .hour(formData.startTime.hour())
         .minute(formData.startTime.minute())
+        .second(0)
         .format('YYYY-MM-DD HH:mm:ss');
 
       const eventData = {
         name: formData.name,
         event_datetime: eventDateTime,
+        timezone: userTimezone,
         latitude: formData.latitude,
         longitude: formData.longitude,
         description: formData.description || null,
