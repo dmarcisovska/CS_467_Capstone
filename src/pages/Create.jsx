@@ -22,8 +22,11 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Autocomplete from 'react-google-autocomplete';
+import { useNavigate } from 'react-router-dom';
+import { createEvent } from '../services/api';
 
 const Create = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     date: null,
@@ -42,6 +45,17 @@ const Create = () => {
 
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeError, setGeocodeError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  // Check if user is logged in on component mount
+  React.useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -80,20 +94,57 @@ const Create = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
     
     // Validation
     if (!formData.name || !formData.date || !formData.startTime || !formData.address) {
-      alert('Please fill in all required fields');
+      setError('Please fill in all required fields');
       return;
     }
 
     if (!formData.latitude || !formData.longitude) {
-      alert('Please select an address from the suggestions');
+      setError('Please select an address from the suggestions');
       return;
     }
 
-    // TODO: Submit to your backend API
-    console.log('Form data:', formData);
+    setSubmitting(true);
+
+    try {
+      // Combine date and time into single datetime
+      const eventDateTime = formData.date
+        .hour(formData.startTime.hour())
+        .minute(formData.startTime.minute())
+        .format('YYYY-MM-DD HH:mm:ss');
+
+      const eventData = {
+        name: formData.name,
+        event_datetime: eventDateTime,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        description: formData.description || null,
+        distance: parseFloat(formData.distance) || null,
+        elevation: parseFloat(formData.elevation) || null,
+        difficulty: formData.difficulty || null,
+      };
+
+      console.log('Creating event:', eventData);
+      
+      const response = await createEvent(eventData);
+      console.log('Event created:', response);
+      
+      setSuccess('Event created successfully! Redirecting...');
+      
+      setTimeout(() => {
+        navigate('/events');
+      }, 2000);
+      
+    } catch (err) {
+      console.error('Error creating event:', err);
+      setError(err.message || 'Failed to create event. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -155,6 +206,18 @@ const Create = () => {
             <Typography variant="body2" color="text.secondary">
               Enter the basics for your race.
             </Typography>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
 
             <Divider />
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -335,9 +398,10 @@ const Create = () => {
                   variant="contained"
                   size="large"
                   sx={{ mt: 4, mb: 4 }}
-                  endIcon={<RunCircleIcon />}
+                  endIcon={submitting ? null : <RunCircleIcon />}
+                  disabled={submitting}
                 >
-                  Create Running Event
+                  {submitting ? <CircularProgress size={24} /> : 'Create Running Event'}
                 </Button>
               </Box>
             </LocalizationProvider>
