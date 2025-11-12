@@ -168,3 +168,28 @@ export const updateEvent = async (eventId, eventData) => {
     throw error;
   }
 };
+
+export const deleteEvent = async (eventId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) {
+      throw new Error('Must be logged in to delete event');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
+      method: 'DELETE',
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to delete event');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+};
