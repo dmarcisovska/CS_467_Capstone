@@ -63,14 +63,35 @@ export const getEventById = async (req, res) => {
 
 export const updateEvent = async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const newData = req.body;
-
-    const event = await updateEventService(eventId, newData);
-    res.status(200).json(event);
+    const { id } = req.params;
+    const eventData = req.body;
+    
+    const { sponsors, prizes, ...eventFields } = eventData;
+    
+    const updatedEvent = await updateEventService(id, eventFields);
+    
+    if (!updatedEvent || updatedEvent.length === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    if (sponsors !== undefined || prizes !== undefined) {
+      await pool.query(
+        'DELETE FROM event_sponsors WHERE event_id = $1',
+        [id]
+      );
+      
+      if (sponsors || prizes) {
+        await pool.query(
+          'INSERT INTO event_sponsors (event_id, sponsor, prize) VALUES ($1, $2, $3)',
+          [id, sponsors || null, prizes || null]
+        );
+      }
+    }
+    
+    res.status(200).json(updatedEvent);
   } catch (error) {
-    console.error("Error updating event by ID:", error);
-    res.status(500).json({ error: "Failed to update"});
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: 'Failed to update event' });
   }
 }
 

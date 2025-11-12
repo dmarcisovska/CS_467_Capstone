@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import EventDetails from './pages/EventDetails';
 import Profile from './pages/Profile';
+import EditEvent from './pages/EditEvent';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/events' element={<Events />} />
         <Route path='/events/:id' element={<EventDetails />} />
+        <Route path='/events/:id/edit' element={<EditEvent />} />
         <Route path='/create' element={<Create />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
