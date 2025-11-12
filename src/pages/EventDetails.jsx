@@ -18,6 +18,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
 import { fetchEventById } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import EditIcon from '@mui/icons-material/Edit';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -28,6 +29,7 @@ const EventDetails = () => {
   const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
   const [address, setAddress] = useState('');
+  const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -113,6 +115,14 @@ const EventDetails = () => {
     };
     return colors[difficulty] || 'default';
   };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && event) {
+      const user = JSON.parse(storedUser);
+      setIsCreator(user.user_id === event.creator_user_id);
+    }
+  }, [event]);
 
   if (loading) {
     return (
@@ -221,6 +231,19 @@ const EventDetails = () => {
             )}
 
         <Paper sx={{ p: 4, position: 'relative' }}>
+          {isCreator && (
+            <Box>
+              <Button
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => navigate(`/events/${id}/edit`)}
+                sx={{mb:4}}
+              >
+                Edit Event
+              </Button>
+            </Box>
+          )}
+
           <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {event.difficulty && (
               <Chip
