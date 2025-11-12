@@ -16,7 +16,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById, deleteEvent } from '../services/api';
+import { fetchEventById, deleteEvent, registerForEvent } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -38,6 +38,8 @@ const EventDetails = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -125,12 +127,40 @@ const EventDetails = () => {
   };
 
   useEffect(() => {
+    // Check if logged-in user is the event creator or already registered
     const storedUser = localStorage.getItem('user');
     if (storedUser && event) {
       const user = JSON.parse(storedUser);
       setIsCreator(user.user_id === event.creator_user_id);
+      
+      // Check if user is already registered (check volunteers or would need registrations data)
+      // For now, we'll just check volunteers array
+      const alreadyRegistered = event.volunteers?.some(v => v.user_id === user.user_id);
+      setIsRegistered(alreadyRegistered);
     }
   }, [event]);
+
+  const handleRegister = async () => {
+    const user = localStorage.getItem('user');
+    
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setRegistering(true);
+    
+    try {
+      await registerForEvent(id);
+      alert('Successfully registered for event!');
+      // Reload event details
+      loadEvent();
+    } catch (err) {
+      alert(err.message || 'Failed to register for event');
+    } finally {
+      setRegistering(false);
+    }
+  };
 
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
@@ -221,6 +251,26 @@ const EventDetails = () => {
         >
           Back to Events
         </Button>
+
+        {!isCreator && !isRegistered && (
+          <Box sx={{ mb: 3 }}>
+            <Button
+              variant="contained"
+              size="large"
+              color="primary"
+              onClick={handleRegister}
+              disabled={registering}
+            >
+              {registering ? <CircularProgress size={24} /> : 'Register for Event'}
+            </Button>
+          </Box>
+        )}
+
+        {isRegistered && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            You are registered for this event!
+          </Alert>
+        )}
 
             {timeLeft && !timeLeft.isPast && (
               <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 3, borderRadius: 2, mb: 4 }}>

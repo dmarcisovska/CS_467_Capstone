@@ -193,3 +193,35 @@ export const deleteEvent = async (eventId) => {
     throw error;
   }
 };
+
+export const registerForEvent = async (eventId, role = 'Runner') => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) {
+      throw new Error('Must be logged in to register for event');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: user.user_id,
+        role: role,
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to register for event');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error registering for event:', error);
+    throw error;
+  }
+};

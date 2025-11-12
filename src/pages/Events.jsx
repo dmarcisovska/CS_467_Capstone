@@ -18,7 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import titleImg from '../assets/gigi-bIpKSEsaN6Q-unsplash.jpg';
-import { fetchEvents } from '../services/api';
+import { fetchEvents, registerForEvent } from '../services/api';
 // import cardImg from '../assets/trail.jpg'; // unused
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
@@ -31,7 +31,7 @@ const Events = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
-
+  const [registering, setRegistering] = useState(null); 
 
   useEffect(() => {
     console.log('Requesting geolocation...');
@@ -114,6 +114,28 @@ const Events = () => {
       Hard: 'error',
     };
     return colors[difficulty] || 'default';
+  };
+
+  const handleRegister = async (eventId) => {
+    const user = localStorage.getItem('user');
+    
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setRegistering(eventId);
+    
+    try {
+      await registerForEvent(eventId);
+      alert('Successfully registered for event!');
+      // Reload events to update participant count
+      loadEvents();
+    } catch (err) {
+      alert(err.message || 'Failed to register for event');
+    } finally {
+      setRegistering(null);
+    }
   };
 
   // Initial event data fetch on page load
@@ -334,8 +356,18 @@ const Events = () => {
                         >
                           View Details
                         </Button>
-                        <Button variant="outlined" size="small" color="primary">
-                          Register
+                        <Button 
+                          variant="outlined" 
+                          size="small" 
+                          color="primary"
+                          onClick={() => handleRegister(event.event_id)}
+                          disabled={registering === event.event_id}
+                        >
+                          {registering === event.event_id ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            'Register'
+                          )}
                         </Button>
                       </CardActions>
                     </Card>
