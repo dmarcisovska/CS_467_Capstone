@@ -98,14 +98,15 @@ const Register = () => {
     setSubmitting(true);
 
     try {
-      // data to be sent to our backend API
       const userData = {
         username: formData.username,
         email: formData.email,
         password: formData.password,
         birthday: formData.birthday ? formData.birthday.format('YYYY-MM-DD') : null,
-        avatar_url: formData.avatarUrl || null, // API not ready to handle images, have to make this optional for now
+        avatar_url: formData.avatarUrl || null,
       };
+
+      console.log('Sending registration data:', userData); // Debug log
 
       const response = await registerUser(userData);
       console.log('Registration successful:', response);
@@ -117,6 +118,7 @@ const Register = () => {
       }, 2000);
     } catch (err) {
       console.error('Registration error:', err);
+      console.error('Error message:', err.message); // More detailed error
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setSubmitting(false);
