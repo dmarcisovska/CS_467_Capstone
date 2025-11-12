@@ -1,4 +1,5 @@
 import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService } from "../services/eventService.js"
+import pool from "../server.js";
 
 
 export const getEvents = async (req, res) => {
@@ -28,9 +29,18 @@ export const getFeaturedEvents = async (req, res) => {
 
 export const createEvent = async (req, res) => {
   try {
-    // should use the given data in the body
-    const newEvent = await createEventService(req.body);
-    res.status(200).json(newEvent);
+    const eventData = req.body;   
+    const { sponsors, prizes, ...eventFields } = eventData;
+    const newEvent = await createEventService(eventFields);
+        if (sponsors || prizes) {
+      await pool.query(
+        `INSERT INTO event_sponsors (event_id, sponsor, prize)
+         VALUES ($1, $2, $3)`,
+        [newEvent[0].event_id, sponsors || null, prizes || null]
+      );
+    }
+    
+    res.status(201).json(newEvent);
 
   } catch (error) {
     console.error("Error creating event:", error);

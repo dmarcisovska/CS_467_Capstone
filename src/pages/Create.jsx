@@ -129,6 +129,8 @@ const Create = () => {
         distance: parseFloat(formData.distance) || null,
         elevation: parseFloat(formData.elevation) || null,
         difficulty: formData.difficulty || null,
+        sponsors: formData.sponsors || null,  // Add this
+        prizes: formData.prizes || null,       // Add this
       };
 
       console.log('Creating event:', eventData);
