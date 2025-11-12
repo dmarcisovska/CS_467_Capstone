@@ -14,22 +14,51 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
-import { NavLink } from 'react-router-dom';
-import avatarImg from "../assets/denisa.jpeg"
+import { NavLink, useNavigate } from 'react-router-dom';
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout', 'Register'];
+const settings = ['Profile', 'Logout'];
 
 const pages = [
   { text: 'Home', to: '/' },
   { text: 'Events', to: '/events' },
   { text: 'Create Event', to: '/create' },
-    { text: 'Login', to: '/login' },
-  { text: 'Register', to: '/register' },
 ];
 
 function ResponsiveAppBar() {
+  const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  // Check if user is logged in by looking for user data in localStorage
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    // Check localStorage for user on mount
+    const checkUser = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setIsLoggedIn(true);
+      } else {
+        setUser(null);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkUser();
+
+    // Listen for storage changes (when user logs in/out)
+    window.addEventListener('storage', checkUser);
+
+    // Listen for custom event when login happens in same tab
+    window.addEventListener('userLoggedIn', checkUser);
+
+    return () => {
+      window.removeEventListener('storage', checkUser);
+      window.removeEventListener('userLoggedIn', checkUser);
+    };
+  }, []);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -42,6 +71,20 @@ function ResponsiveAppBar() {
   };
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleMenuAction = (setting) => {
+    handleCloseUserMenu();
+    
+    if (setting === 'Logout') {
+      localStorage.removeItem('user');
+      setIsLoggedIn(false);
+      setUser(null);
+      navigate('/login');
+    } else if (setting === 'Profile') {
+      navigate('/profile');
+    }
+    // Add other menu actions as needed
   };
 
   // helper to style active links
@@ -157,31 +200,56 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {/* User menu */}
+          {/* User section - Show Avatar if logged in, Login button if not */}
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Denisa" src={avatarImg} />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>
-                    {setting}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
+            {isLoggedIn ? (
+              <>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar 
+                      alt={user?.username}
+                      src={user?.avatar_url || undefined}
+                      sx={{
+                        bgcolor: user?.avatar_url ? 'transparent' : 'primary.main',
+                      }}
+                    >
+                      {!user?.avatar_url && user?.username?.[0]?.toLowerCase()}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  keepMounted
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  {settings.map((setting) => (
+                    <MenuItem 
+                      key={setting} 
+                      onClick={() => handleMenuAction(setting)}
+                    >
+                      <Typography sx={{ textAlign: 'center' }}>
+                        {setting}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            ) : (
+              <Button
+                component={NavLink}
+                to="/login"
+                variant="contained"
+                color="primary"
+                sx={{ ml: 2 }}
+              >
+                Login
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>

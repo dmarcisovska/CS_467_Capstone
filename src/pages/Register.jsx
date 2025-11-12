@@ -14,8 +14,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
+import { registerUser } from '../services/api';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
@@ -39,6 +44,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -89,7 +95,34 @@ const Register = () => {
       return;
     }
 
-    setSuccess('Registration successful! Redirecting to login...');
+    setSubmitting(true);
+
+    try {
+      const userData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        birthday: formData.birthday ? formData.birthday.format('YYYY-MM-DD') : null,
+        avatar_url: formData.avatarUrl || null,
+      };
+
+      console.log('Sending registration data:', userData); // Debug log
+
+      const response = await registerUser(userData);
+      console.log('Registration successful:', response);
+
+      setSuccess('Registration successful! Redirecting to login...');
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (err) {
+      console.error('Registration error:', err);
+      console.error('Error message:', err.message); // More detailed error
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -146,7 +179,7 @@ const Register = () => {
           >
             <Stack spacing={3}>
               <Typography variant="h5" fontWeight={300}>
-                Register for our site
+                Create account
               </Typography>
 
               {error && <Alert severity="error">{error}</Alert>}
@@ -181,7 +214,6 @@ const Register = () => {
                 value={formData.username}
                 onChange={handleChange}
                 variant="filled"
-           
               />
 
               <TextField
@@ -242,10 +274,11 @@ const Register = () => {
                 variant="contained"
                 size="large"
                 fullWidth
-                endIcon={<PersonAddIcon />}
+                endIcon={submitting ? null : <PersonAddIcon />}
                 sx={{ mt: 2 }}
+                disabled={submitting}
               >
-                Register
+                {submitting ? <CircularProgress size={24} /> : 'Create Account'}
               </Button>
 
               <Typography

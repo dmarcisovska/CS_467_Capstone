@@ -10,6 +10,8 @@ import Events from './pages/Events';
 import Create from './pages/Create';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import EventDetails from './pages/EventDetails';
+import Profile from './pages/Profile';
 
 function App() {
 
@@ -20,9 +22,11 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/events' element={<Events />} />
+        <Route path='/events/:id' element={<EventDetails />} />
         <Route path='/create' element={<Create />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/profile' element={<Profile />} />
       </Routes>
     </>
   )
