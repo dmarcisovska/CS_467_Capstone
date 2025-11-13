@@ -1,15 +1,22 @@
 import * as eventRepository from "../repositories/eventRepository.js";
 
 export const getEventsService = async (filters) => {
+  let { sortBy, radius, lat, lng, minParticipants, dateFilter, startDate, endDate } = filters;
+
+  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+    throw new Error("startDate must be earlier than the provided endDate");
+  }
   
-  // Business Logic like validation/filtering etc.
-  
-    return await eventRepository.getEventsRepository(filters);
+  return await eventRepository.getEventsRepository(filters);
 };
 
 export const getFeaturedEventsService = async () => {
 
-  return await eventRepository.getFeaturedEventsRepository();
+  const events = await eventRepository.getFeaturedEventsRepository();
+  if (events.length === 0) {
+    console.log("No featured events found, possible no event entries")
+  }
+  return events
 };
 
 export const createEventService = async (eventData) => {
@@ -25,11 +32,19 @@ export const deleteEventService = async (eventId) => {
 }
 
 export const registerForEventService = async (eventId, userId, role) => {
+
+  const roles = ['Runner', 'Starting Official', 'Finish Line Official']
+
+  if (!roles.includes(role)) {
+    const error = new Error("invalid role")
+    error.status = 400;
+    throw error
+  }
+
   try {
     return await eventRepository.registerForEventRepository(eventId, userId, role);
-  // eslint-disable-next-line no-unused-vars
   } catch (error) {
-      const err = new Error("User already registered")
+      const err = new Error("Error during registering for an event, user may already be registered")
       err.status = 409
       throw err;
       
@@ -55,7 +70,6 @@ export const getEventByIdService = async (eventId) => {
       error.status = 404;
       throw error;
     }
-
     return eventObj;
 
   } catch (error) {
@@ -63,3 +77,47 @@ export const getEventByIdService = async (eventId) => {
     throw error;
   }
 } 
+
+export const getVolunteersForEventService = async (eventId) => {
+  try {
+    const volunteerList = await eventRepository.getVolunteerList(eventId);
+    return volunteerList
+  } catch (error) {
+    console.error("Error when retrieving volunteer list", error.message);
+    throw error;
+  }
+}
+
+export const getFinalistsService = async (eventId) => {
+
+  try {
+    const runners = await eventRepository.getFinalistListRepository(eventId);
+    return runners;
+  } catch (error) {
+    console.error("Error when retrieving finalist list", error);
+    throw error;
+  }
+}
+
+export const getRunnersService = async (eventId) => {
+
+  try {
+    const runners = await eventRepository.getRunnersListRepository(eventId)
+    return runners;
+  } catch (error) {
+    console.error("Error when retrieving runners list", error);
+    throw error;
+  }
+}
+
+
+export const getParticipantsService = async (eventId) => {
+
+  try {
+    const participant = await eventRepository.getParticipantsRepository(eventId)
+    return participant;
+  } catch (error) {
+    console.error("Error when retrieving particiant list", error);
+    throw error;
+  }
+}
