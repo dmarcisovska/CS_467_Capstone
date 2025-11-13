@@ -1,46 +1,45 @@
-// import pool from "../server.js";
-import fs from 'fs/promises';
-import path from 'path';
+import pool from "../server.js";
 import { fileURLToPath } from "url";
 
-
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-
-// TODO: save this data to the database in the future
+/**
+ * Gets the avatar for the specified user.
+ * @param {string} userId The user_id (uuid) to fetch the avatar for. 
+ * @returns {Promise<Object>} Object containing avatar buffer and metadata.
+ */
 export const getProfilePictureRepository = async (userId) => {
-  // look for blob data associated with the user_id
-  const outputDir = path.join(__dirname, '../profile_picture_test');
-  const binFilePath = path.join(outputDir, `user_${userId}_blob.bin`);
-  const metadataFilePath = path.join(outputDir, `user_${userId}_metadata.json`);
+  const result = await pool.query(`
+    SELECT avatar, avatar_meta
+    FROM users
+    WHERE user_id = $1
+    `,
+    [userId]
+  );
 
-  // read the metadata json file
-  const metadataContent = await fs.readFile(metadataFilePath, 'utf-8');
-  const metadata = JSON.parse(metadataContent)
-
-  // read the 
-  const pictureBuffer = await fs.readFile(binFilePath);
-
-  return {
-    pictureBlob: pictureBuffer,
-    mimeType: metadata.mimeType,
-    fileName: metadata.originalName,
+  if (result.rows.length === 0) {
+    throw new Error("Profile picture not found");
   }
 
-}
+  const row = result.rows[0];
 
-// Currently it is made to send the binary to a txt file for now
-// TODO: save this data to the postgres data base for the user
+  if (!row.avatar) {
+    throw new Error("Profile picture not found");
+  }
+
+  return {
+    pictureBlob: row.avatar,
+    mimeType: row.avatar_meta.mimeType,
+    fileName: row.avatar_meta.originalName,
+  };
+};
+
+/**
+ * Updates the avatar for the specified user in the database.
+ * @param {Object} pictureData The avatar image to write to the database.
+ * @returns {Promise<Object>} Hash containing success (bool) and updated row.
+ */
 export const patchProfilePictureRepository = async (pictureData) => {
-  const outputDir = path.join(__dirname, '../profile_picture_test');
-  await fs.mkdir(outputDir, {recursive: true});
-
-  // new bin filename containing the BLOB data
-  const binFilePath = path.join(outputDir, `user_${pictureData.userId}_blob.bin`);
-  const metadataFilePath = path.join(outputDir, `user_${pictureData.userId}_metadata.json`);
-
-  // the metadata for the blob
   const metadata = {
     userId: pictureData.userId,
     originalName: pictureData.originalName,
@@ -49,14 +48,21 @@ export const patchProfilePictureRepository = async (pictureData) => {
     uploadDate: new Date().toISOString(),
   };
 
-  // write the blob to the bin file
-  await fs.writeFile(binFilePath, pictureData.pictureBlob);
+  const result = await pool.query(`
+    UPDATE users
+    SET avatar = $1, avatar_meta = $2
+    WHERE user_id = $3
+    RETURNING *
+    `,
+    [pictureData.pictureBlob, JSON.stringify(metadata), pictureData.userId]
+  );
 
-  // write blob metadata to the metadata file
-  await fs.writeFile(metadataFilePath, JSON.stringify(metadata, null, 2));
+  if (result.rows.length === 0) {
+    throw new Error('User not found');
+  }
 
-  return { 
-    success: true, 
-    filePath: binFilePath
+  return {
+    success: true,
+    data: result.rows[0],
   };
-}
+};
