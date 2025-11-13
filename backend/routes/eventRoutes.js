@@ -11,14 +11,13 @@ router.get("/", getEvents)
 router.get("/featuredevents", getFeaturedEvents)
 router.post("/:eventId/register", registerForEvent)
 router.delete("/:eventId/register/:userId", unregisterForEvent)
-router.get("/:event_id", getEventById)
 router.get("/:eventId/volunteers", getVolunteers)
 router.get("/:eventId/finalists", getFinalists)
 router.get("/:eventId/runners", getRunners)
 router.get("/:eventId/participants", getParticipants)
 
 // GET specific event uing id
-router.get("/:id", getEventById)
+router.get("/:event_id", getEventById)
 
 // CREATE a new event
 router.post("/", createEvent)
