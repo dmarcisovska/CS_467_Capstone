@@ -1,4 +1,5 @@
 import { patchProfilePictureService, getProfilePictureService } from "../services/profilePictureService.js";
+import pool from "../server.js";
 
 
 export const patchProfilePictureById = async (req, res) => {
@@ -9,7 +10,6 @@ export const patchProfilePictureById = async (req, res) => {
 
     const userId = req.params.user_id;
 
-    // profile picture data
     const pictureData = {
       userId: userId,
       pictureBlob: req.file.buffer,
@@ -18,15 +18,28 @@ export const patchProfilePictureById = async (req, res) => {
       size: req.file.size
     };
 
-    console.log(pictureData)
-
     if (!userId) {
       return res.status(400).json({error: "No user_id"})
-
     }
 
+    // Save file to disk
     const profilePicture = await patchProfilePictureService(pictureData);
-    res.status(200).json(profilePicture);
+
+    // Build URL from env or current request host
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const avatarUrl = `${baseUrl}/api/profile-picture/${userId}`;
+
+    await pool.query(
+      'UPDATE users SET avatar_url = $1 WHERE user_id = $2',
+      [avatarUrl, userId]
+    );
+
+    // Return avatar_url so frontend can use it
+    res.status(200).json({
+      success: true,
+      avatar_url: avatarUrl,
+      message: 'Avatar uploaded successfully'
+    });
 
   } catch (error) {
     console.error("Error uploading photo", error);

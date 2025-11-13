@@ -50,6 +50,13 @@ export default function userRoutes(pool, authMiddleware) {
         {expiresIn: '7d'}
       )
 
+      // Normalize avatar_url for response
+      const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+      const normalizedAvatarUrl =
+        user.avatar_url && !String(user.avatar_url).startsWith('undefined')
+          ? user.avatar_url
+          : `${baseUrl}/api/profile-picture/${user.user_id}`;
+
       res.json({
         message: 'login successful',
         token,
@@ -57,7 +64,7 @@ export default function userRoutes(pool, authMiddleware) {
           user_id: user.user_id,
           email: user.email,
           username: user.username,
-          avatar_url: user.avatar_url
+          avatar_url: normalizedAvatarUrl
         }
       });
 
@@ -130,14 +137,25 @@ export default function userRoutes(pool, authMiddleware) {
     try {
       const { user_id } = req.params;
 
-      // check if user exists
       const users = await pool.query(`
         SELECT user_id, email, username, avatar_url, created_at
         FROM users
         WHERE user_id = $1 AND is_deleted = false
       `, [user_id]);
 
-      res.json(users.rows[0]);
+      const row = users.rows[0];
+
+      // Normalize avatar_url for response
+      const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+      const normalizedAvatarUrl =
+        row?.avatar_url && !String(row.avatar_url).startsWith('undefined')
+          ? row.avatar_url
+          : `${baseUrl}/api/profile-picture/${user_id}`;
+
+      res.json({
+        ...row,
+        avatar_url: normalizedAvatarUrl
+      });
 
     } catch (error) {
       console.error(error);

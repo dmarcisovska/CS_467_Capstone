@@ -16,6 +16,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import CircularProgress from '@mui/material/CircularProgress';
 import titleImg from '../assets/nature-run.jpg';
+import { API_BASE_URL } from '../services/api';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -70,7 +71,8 @@ const Profile = () => {
       const formData = new FormData();
       formData.append('profilePicture', file);
 
-      const response = await fetch(`http://localhost:8080/api/profile-picture/${user.user_id}`, {
+      const uploadUrl = `${API_BASE_URL}/api/profile-picture/${user.user_id}`;
+      const response = await fetch(uploadUrl, {
         method: 'PATCH',
         body: formData,
       });
@@ -79,17 +81,19 @@ const Profile = () => {
         throw new Error('Failed to upload avatar');
       }
 
-      const avatarUrl = `http://localhost:8080/api/profile-picture/${user.user_id}`;
+      const data = await response.json();
+
+      // Use the avatar_url returned by backend
       const updatedUser = {
         ...user,
-        avatar_url: avatarUrl,
+        avatar_url: data.avatar_url || `${API_BASE_URL}/api/profile-picture/${user.user_id}`,
       };
-      
+
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      setAvatarKey(Date.now());
+      setAvatarKey(Date.now()); // cache-bust on this page only
       window.dispatchEvent(new Event('userLoggedIn'));
-      
+
       alert('Avatar updated successfully!');
     } catch (error) {
       alert('Failed to upload avatar: ' + error.message);
