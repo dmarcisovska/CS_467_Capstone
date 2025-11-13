@@ -264,3 +264,80 @@ export const getEventByIdRepository = async (eventId) => {
   throw error;
   }
 }
+
+export const getVolunteerList = async (eventId) => {
+  const query = `SELECT r.event_id, r.user_id, r.role, u.username, u.email 
+            FROM registrations r
+            JOIN users u
+            ON r.user_id = u.user_id
+            
+            WHERE r.event_id = $1 AND r.role != $2`;
+
+  const values = [eventId, 'Runner'];
+  const { rows } = await pool.query(query, values)
+  return rows
+}
+
+export const getFinalistListRepository = async (eventId) => {
+  const query = `
+    SELECT
+      r.event_id,
+      r.user_id,
+      r.role,
+      r.start_time,
+      r.finish_time,
+      r.elapsed_time,
+      u.username,
+      u.email
+    FROM registrations r
+    LEFT JOIN users u
+      ON r.user_id = u.user_id
+    WHERE r.event_id = $1
+      AND r.role = 'Runner'
+      AND r.finish_time IS NOT NULL
+    ORDER BY r.elapsed_time ASC;
+  `;
+  const values = [eventId]
+  const { rows } = await pool.query(query, values)
+
+  return rows
+}
+
+export const getRunnersListRepository = async (eventId) => {
+  const query = `SELECT
+      r.event_id,
+      r.user_id,
+      r.role,
+      r.start_time,
+      r.finish_time,
+      r.elapsed_time,
+      u.username,
+      u.email
+    FROM registrations r
+    LEFT JOIN users u
+      ON r.user_id = u.user_id
+    WHERE r.event_id = $1
+      AND r.role = 'Runner'
+    ORDER BY r.elapsed_time ASC;
+  `;
+
+  const values = [eventId]
+  const { rows } = await pool.query(query, values)
+
+  return rows
+}
+
+
+export const getParticipantsRepository = async (eventId) => {
+
+  const query = `SELECT r.event_id, r.user_id, r.role, u.username, u.email
+                FROM registrations r
+                LEFT JOIN users u
+                  ON r.user_id = u.user_id
+                WHERE r.event_id = $1
+                ORDER BY r.role, u.username`;
+
+  const values = [eventId]
+  const { rows } = await pool.query(query, values)
+  return rows
+}
