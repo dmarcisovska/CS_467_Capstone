@@ -104,3 +104,92 @@ export const loginUser = async (credentials) => {
     throw error;
   }
 };
+
+export const createEvent = async (eventData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) {
+      throw new Error('Must be logged in to create event');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...eventData,
+        creator_user_id: user.user_id,
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create event');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating event:', error);
+    throw error;
+  }
+};
+
+export const updateEvent = async (eventId, eventData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) {
+      throw new Error('Must be logged in to update event');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...eventData,
+        creator_user_id: user.user_id,
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update event');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
+};
+
+export const deleteEvent = async (eventId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) {
+      throw new Error('Must be logged in to delete event');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
+      method: 'DELETE',
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to delete event');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+};

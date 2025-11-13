@@ -16,8 +16,15 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById } from '../services/api';
+import { fetchEventById, deleteEvent } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContentText from '@mui/material/DialogContentText';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -28,6 +35,9 @@ const EventDetails = () => {
   const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
   const [address, setAddress] = useState('');
+  const [isCreator, setIsCreator] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -112,6 +122,35 @@ const EventDetails = () => {
       Hard: 'error',
     };
     return colors[difficulty] || 'default';
+  };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && event) {
+      const user = JSON.parse(storedUser);
+      setIsCreator(user.user_id === event.creator_user_id);
+    }
+  }, [event]);
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+      await deleteEvent(id);
+      alert('Event deleted successfully');
+      navigate('/events');
+    } catch (err) {
+      alert('Failed to delete event: ' + err.message);
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+    }
   };
 
   if (loading) {
@@ -221,6 +260,27 @@ const EventDetails = () => {
             )}
 
         <Paper sx={{ p: 4, position: 'relative' }}>
+          {/* Show Edit and Delete buttons if user is the creator */}
+          {isCreator && (
+            <Box sx={{ mb:4, display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => navigate(`/events/${id}/edit`)}
+              >
+                Edit Event
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={handleDeleteClick}
+              >
+                Delete Event
+              </Button>
+            </Box>
+          )}
+
           <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {event.difficulty && (
               <Chip
@@ -464,6 +524,32 @@ const EventDetails = () => {
             </Box>
           </Stack>
         </Paper>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleDeleteCancel}
+        >
+          <DialogTitle>Delete Event?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete "{event?.name}"? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDeleteConfirm} 
+              color="error" 
+              variant="contained"
+              disabled={deleting}
+            >
+              {deleting ? <CircularProgress size={24} /> : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </>
   );

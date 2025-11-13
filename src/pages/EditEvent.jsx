@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
@@ -9,24 +9,27 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import titleImg from '../assets/trail3.jpg';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import RunCircleIcon from '@mui/icons-material/RunCircle';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
+import SaveIcon from '@mui/icons-material/Save';
 import Autocomplete from 'react-google-autocomplete';
-import { useNavigate } from 'react-router-dom';
-import { createEvent } from '../services/api';
+import dayjs from 'dayjs';
+import { fetchEventById, updateEvent } from '../services/api';
 
-const Create = () => {
+const EditEvent = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
   const [formData, setFormData] = useState({
     name: '',
     date: null,
@@ -36,26 +39,58 @@ const Create = () => {
     latitude: null,
     longitude: null,
     distance: '',
-    units: 'miles',
     elevation: '',
     difficulty: '',
     sponsors: '',
     prizes: '',
   });
 
-  const [geocoding, setGeocoding] = useState(false);
-  const [geocodeError, setGeocodeError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  // Check if user is logged in on component mount
-  React.useEffect(() => {
+  useEffect(() => {
+    // Check if user is logged in
     const user = localStorage.getItem('user');
     if (!user) {
       navigate('/login');
+      return;
     }
-  }, [navigate]);
+
+    loadEvent();
+  }, [id, navigate]);
+
+  const loadEvent = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchEventById(id);
+      
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (data.creator_user_id !== user.user_id) {
+        setError('You do not have permission to edit this event');
+        setTimeout(() => navigate(`/events/${id}`), 2000);
+        return;
+      }
+
+      const eventDate = dayjs(data.event_datetime);
+      
+      setFormData({
+        name: data.name || '',
+        date: eventDate,
+        startTime: eventDate,
+        description: data.description || '',
+        address: '',
+        latitude: data.latitude,
+        longitude: data.longitude,
+        distance: data.distance || '',
+        elevation: data.elevation || '',
+        difficulty: data.difficulty || '',
+        sponsors: data.sponsors?.[0]?.sponsor || '',
+        prizes: data.sponsors?.[0]?.prize || '',
+      });
+    } catch (err) {
+      setError('Failed to load event');
+      console.error('Error loading event:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -73,7 +108,6 @@ const Create = () => {
   };
 
   const handlePlaceSelected = (place) => {
-    console.log('Place selected:', place);
     if (place.geometry) {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
@@ -84,11 +118,6 @@ const Create = () => {
         latitude: lat,
         longitude: lng,
       });
-      setGeocodeError('');
-      
-      // Log the location details
-      console.log('Location found:', place.formatted_address);
-      console.log('Coordinates:', lat.toFixed(4), lng.toFixed(4));
     }
   };
 
@@ -96,23 +125,15 @@ const Create = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    
-    // Validation
-    if (!formData.name || !formData.date || !formData.startTime || !formData.address) {
-      setError('Please fill in all required fields');
-      return;
-    }
 
-    if (!formData.latitude || !formData.longitude) {
-      setError('Please select an address from the suggestions');
+    if (!formData.name || !formData.date || !formData.startTime) {
+      setError('Please fill in all required fields');
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
       const eventDateTime = formData.date
         .hour(formData.startTime.hour())
         .minute(formData.startTime.minute())
@@ -122,35 +143,36 @@ const Create = () => {
       const eventData = {
         name: formData.name,
         event_datetime: eventDateTime,
-        timezone: userTimezone,
         latitude: formData.latitude,
         longitude: formData.longitude,
         description: formData.description || null,
         distance: parseFloat(formData.distance) || null,
         elevation: parseFloat(formData.elevation) || null,
         difficulty: formData.difficulty || null,
-        sponsors: formData.sponsors || null,  // Add this
-        prizes: formData.prizes || null,       // Add this
+        sponsors: formData.sponsors || null,
+        prizes: formData.prizes || null,
       };
 
-      console.log('Creating event:', eventData);
-      
-      const response = await createEvent(eventData);
-      console.log('Event created:', response);
-      
-      setSuccess('Event created successfully! Redirecting...');
+      await updateEvent(id, eventData);
+      setSuccess('Event updated successfully! Redirecting...');
       
       setTimeout(() => {
-        navigate('/events');
+        navigate(`/events/${id}`);
       }, 2000);
-      
     } catch (err) {
-      console.error('Error creating event:', err);
-      setError(err.message || 'Failed to create event. Please try again.');
+      setError(err.message || 'Failed to update event');
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -179,18 +201,15 @@ const Create = () => {
             zIndex: 1,
           }}
         />
-
         <Typography
           variant="h2"
           component="h1"
-          sx={{
-            position: 'relative',
-            zIndex: 2,
-          }}
+          sx={{ position: 'relative', zIndex: 2 }}
         >
-          Start a Race
+          Edit Event
         </Typography>
       </Box>
+
       <Box>
         <Container
           sx={{
@@ -201,30 +220,15 @@ const Create = () => {
           }}
         >
           <Stack spacing={2}>
-            <Typography
-              variant="h4"
-              fontWeight={600}
-              sx={{ mb: 3, fontWeight: 'semibold' }}
-            >
+            <Typography variant="h4" fontWeight={600} sx={{ mb: 3 }}>
               Event Details
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Enter the basics for your race.
-            </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
             <Divider />
+            
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Grid container spacing={2}>
@@ -236,12 +240,9 @@ const Create = () => {
                     onChange={handleChange}
                     variant="filled"
                     required
-                    sx={{
-                      mb: 2,
-                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                      borderRadius: 1,
-                    }}
+                    sx={{ mb: 2 }}
                   />
+                  
                   <DatePicker
                     label="Event Date"
                     value={formData.date}
@@ -251,14 +252,11 @@ const Create = () => {
                         variant: 'filled',
                         fullWidth: true,
                         required: true,
-                        sx: {
-                          mb: 2,
-                          backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                          borderRadius: 1,
-                        },
+                        sx: { mb: 2 },
                       },
                     }}
                   />
+                  
                   <TimePicker
                     label="Start Time"
                     value={formData.startTime}
@@ -268,11 +266,7 @@ const Create = () => {
                         variant: 'filled',
                         fullWidth: true,
                         required: true,
-                        sx: {
-                          mb: 2,
-                          backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                          borderRadius: 1,
-                        },
+                        sx: { mb: 2 },
                       },
                     }}
                   />
@@ -310,51 +304,29 @@ const Create = () => {
                       marginBottom: '16px',
                       fontFamily: 'Roboto, sans-serif',
                     }}
-                    placeholder="Start typing an address..."
+                    placeholder="Update address..."
                   />
-
-                  {geocodeError && (
-                    <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-                      {geocodeError}
-                    </Alert>
-                  )}
 
                   <TextField
                     fullWidth
                     name="distance"
-                    label="Distance"
+                    label="Distance (miles)"
                     type="number"
                     value={formData.distance}
                     onChange={handleChange}
                     variant="filled"
                   />
-                  <TextField
-                    select
-                    fullWidth
-                    name="units"
-                    label="Units"
-                    value={formData.units}
-                    onChange={handleChange}
-                    variant="filled"
-                    sx={{
-                      mb: 2,
-                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                      borderRadius: 1,
-                    }}
-                  >
-                    <MenuItem value="miles">Miles</MenuItem>
-                    <MenuItem value="km">Kilometers</MenuItem>
-                  </TextField>
+                  
                   <TextField
                     fullWidth
                     name="elevation"
-                    label="Elevation Gain (ft or m)"
+                    label="Elevation Gain (ft)"
                     value={formData.elevation}
                     onChange={handleChange}
                     variant="filled"
                     type="number"
-                    inputProps={{ min: 0, step: 'any' }}
                   />
+                  
                   <TextField
                     select
                     fullWidth
@@ -370,7 +342,7 @@ const Create = () => {
                   </TextField>
 
                   <Typography variant="h6" sx={{ mt: 3, mb: 1, width: '100%' }}>
-                    Sponsors & Prizes (Optional)
+                    Sponsors & Prizes
                   </Typography>
 
                   <TextField
@@ -382,7 +354,6 @@ const Create = () => {
                     variant="filled"
                     multiline
                     rows={2}
-                    placeholder="List any sponsors"
                   />
 
                   <TextField
@@ -394,20 +365,28 @@ const Create = () => {
                     variant="filled"
                     multiline
                     rows={2}
-                    placeholder="Describe any prizes or awards"
                   />
                 </Grid>
 
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  sx={{ mt: 4, mb: 4 }}
-                  endIcon={submitting ? null : <RunCircleIcon />}
-                  disabled={submitting}
-                >
-                  {submitting ? <CircularProgress size={24} /> : 'Create Running Event'}
-                </Button>
+                <Stack direction="row" spacing={2} sx={{ mt: 4, mb: 4 }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    endIcon={submitting ? null : <SaveIcon />}
+                    disabled={submitting}
+                  >
+                    {submitting ? <CircularProgress size={24} /> : 'Save Changes'}
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() => navigate(`/events/${id}`)}
+                  >
+                    Cancel
+                  </Button>
+                </Stack>
               </Box>
             </LocalizationProvider>
           </Stack>
@@ -417,4 +396,4 @@ const Create = () => {
   );
 };
 
-export default Create;
+export default EditEvent;

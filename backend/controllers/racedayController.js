@@ -1,5 +1,6 @@
 import { BASE_URL } from "../server.js";
 import { createQrCode } from "../services/qrCodeService.js";
+import { verifyUserEventRole } from "../services/authService.js";
 import {
     updateStartTimeService,
     updateFinishTimeService
@@ -14,11 +15,27 @@ import {
 export const createRacerQrCode = async (req, res) => {
     try {
         const { event, user } = req.query;
+        const currentUser = req.user.user_id;
 
         // Validate all inputs are provided
         if (!event || !user) {
-            return res.status(400).json({ 
+            return res.status(400).json({ // Bad Request
                 error: "Event and user are required" 
+            });
+        }
+        // Check if user matches JWT; cannot create QR code for someone else
+        // TODO: Refactor to remove user as a query parameter; fetch from JWT
+        // directly; update downstream dependencies to no longer pass `user`
+        if (user !== currentUser) {
+            return res.status(403).json({ // Forbidden
+                error: "Cannot create QR codes for other users" 
+            });
+        }
+        // Check if user has `Runner` role for the provided event
+        const isRole = await verifyUserEventRole(currentUser, event, ["Runner"]);
+        if (!isRole) {
+            return res.status(403).json({ // Forbidden
+                error: "User must be a runner on the event"
             });
         }
 
@@ -33,10 +50,27 @@ export const createRacerQrCode = async (req, res) => {
         res.status(500).json({ error: "Failed to generate QR code" });
     }
 }
+
 export const updateStartTime = async (req, res) => {
     try {
         const { event } = req.query;
+        const currentUser = req.user.user_id;
+        
+        // Only Starting Officials can start races
+        console.log(`verify if user=${currentUser} on event=${event}`);
+        const isRole = await verifyUserEventRole(
+            currentUser,
+            event,
+            ["Starting Official"]
+        );
+        console.log(`isRole=${isRole}`)
+        if (!isRole) {
+            return res.status(403).json({ // Forbidden
+                error: "Only Starting Officials can start races"
+            });
+        }
 
+        // Update start time
         const success = await updateStartTimeService(event);        
         if (success) {
             return res.status(200).json({ 
@@ -66,6 +100,7 @@ export const updateStartTime = async (req, res) => {
         });
     }
 }
+
 /**
  * Controller for updating a user's finish time for a given event.
  * 
@@ -75,6 +110,19 @@ export const updateStartTime = async (req, res) => {
 export const updateFinishTime = async (req, res) => {
     try {
         const { event, user } = req.query;
+        const currentUser = req.user.user_id;
+        
+        // Only Finish Line Officials can record runners' finish times
+        const isRole = await verifyUserEventRole(
+            currentUser,
+            event,
+            ["Finish Line Official"]
+        );
+        if (!isRole) {
+            return res.status(403).json({ // Forbidden
+                error: "Only Finish Line Officials can record finish times"
+            });
+        }
 
         const success = await updateFinishTimeService(event, user);        
         if (success) {

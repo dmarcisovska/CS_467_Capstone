@@ -104,7 +104,7 @@ function ResponsiveAppBar() {
             sx={{
               display: { xs: 'none', md: 'flex' },
               mr: 1,
-              color: 'inherit',
+              color: 'primary.main',
             }}
           >
             <DirectionsRunIcon />
