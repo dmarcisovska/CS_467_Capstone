@@ -25,6 +25,8 @@ create table public.users (
   updated_at timestamp with time zone not null default now(),
   created_at timestamp with time zone not null default now(),
   is_deleted boolean not null default false,
+  avatar bytea null,
+  avatar_meta jsonb null,
   primary key (user_id),
   unique (email),
   unique (username)
