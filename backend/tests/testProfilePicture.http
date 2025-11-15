@@ -1,13 +1,6 @@
 ### Set avatar
-PATCH http://localhost:8080/api/profile-picture/bd548303-62b7-4535-9bc1-f6a7f30aee19
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="profilePicture"; filename="test-image.jpg"
-Content-Type: image/jpeg
-
-< C:\Users\samlc\Documents\definitely-sam.jpg
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
+# To set avatar, run both frontend and backend, and upload through the website
+# http does not do a good job handling PATCH'ing multipart/form-data
 
 ### Get avatar
 GET http://localhost:8080/api/profile-picture/bd548303-62b7-4535-9bc1-f6a7f30aee19
