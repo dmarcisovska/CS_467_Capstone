@@ -1,5 +1,4 @@
-
-  // References: 1) "This SQL query for getEventsRepository function was generated using the help of chat-gpt to help create a dynamic script.
+// References: 1) "This SQL query for getEventsRepository function was generated using the help of chat-gpt to help create a dynamic script.
   //               "This transcript: "I want a postgresql query that uses a base query to retrieve all rows in the
   //                events table, use the Haversine formula to calculate the distance in miles between
   //                the input user latitude and longitude as lat and lng. Include support to this query by
@@ -229,9 +228,28 @@ export const getEventByIdRepository = async (eventId) => {
   // Utilized AI to help return lists of data from other tables.
   const query = `SELECT e.*,
 
-              (SELECT json_agg(json_build_object('role', er.role, 'role_limit', er.role_limit))
-              FROM event_roles er
-              WHERE er.event_id = e.event_id) AS roles,
+              (
+                SELECT json_agg(
+                  json_build_object(
+                    'role', t.role,
+                    'role_limit', t.role_limit,
+                    'current_count', t.current_count
+                  )
+                )
+                FROM (
+                  SELECT 
+                    er.role,
+                    er.role_limit,
+                    COUNT(r.user_id) AS current_count
+                  FROM event_roles er
+                  LEFT JOIN registrations r
+                    ON r.event_id = er.event_id
+                   AND r.role = er.role
+                  WHERE er.event_id = e.event_id
+                  GROUP BY er.role, er.role_limit
+                  ORDER BY er.role
+                ) t
+              ) AS roles,
               
               (SELECT json_agg(json_build_object('id', es.id, 'sponsor', es.sponsor, 'prize', es.prize))
               FROM event_sponsors es
