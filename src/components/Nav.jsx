@@ -32,6 +32,7 @@ function ResponsiveAppBar() {
   // Check if user is logged in by looking for user data in localStorage
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [user, setUser] = React.useState(null);
+  const [avatarKey, setAvatarKey] = React.useState(Date.now()); // cache-bust key
 
   React.useEffect(() => {
     // Check localStorage for user on mount
@@ -40,6 +41,7 @@ function ResponsiveAppBar() {
       if (storedUser) {
         setUser(JSON.parse(storedUser));
         setIsLoggedIn(true);
+        setAvatarKey(Date.now()); // refresh avatar src when user changes
       } else {
         setUser(null);
         setIsLoggedIn(false);
@@ -208,7 +210,7 @@ function ResponsiveAppBar() {
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar 
                       alt={user?.username}
-                      src={user?.avatar_url || undefined}
+                      src={user?.avatar_url ? `${user.avatar_url}?t=${avatarKey}` : undefined}
                       sx={{
                         bgcolor: user?.avatar_url ? 'transparent' : 'primary.main',
                       }}
