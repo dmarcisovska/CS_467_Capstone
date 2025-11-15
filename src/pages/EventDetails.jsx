@@ -177,6 +177,13 @@ const EventDetails = () => {
     );
   }
 
+  const participantCount =
+    Array.isArray(event?.roles)
+      ? (event.roles.find(r => r.role === 'Runner')?.current_count ?? 0)
+      : (Array.isArray(event?.participants)
+          ? event.participants.length
+          : (event?.participant_count ?? 0));
+
   return (
     <>
       <Box
@@ -291,7 +298,7 @@ const EventDetails = () => {
             )}
             <Chip
               icon={<PeopleIcon />}
-              label={`${event.participant_count || 0} participants`}
+              label={`${participantCount} participants`}
               variant="outlined"
               sx={{ height: '40px', fontSize: '1rem' }}
             />
