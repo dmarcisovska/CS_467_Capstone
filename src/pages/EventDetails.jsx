@@ -16,7 +16,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById, deleteEvent } from '../services/api';
+import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -131,6 +131,16 @@ const EventDetails = () => {
       setIsCreator(user.user_id === event.creator_user_id);
     }
   }, [event]);
+
+  const handleRegister = async () => {
+    try {
+      await registerForEvent(id);
+      alert('Successfully registered!');
+      loadEvent();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
@@ -524,7 +534,7 @@ const EventDetails = () => {
                 size="large"
                 fullWidth
                 sx={{ maxWidth: 400 }}
-                onClick={() => alert('Registered')}
+                onClick={handleRegister}
               >
                 Register 
               </Button>
