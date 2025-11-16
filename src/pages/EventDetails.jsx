@@ -16,7 +16,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById, deleteEvent } from '../services/api';
+import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -132,6 +132,16 @@ const EventDetails = () => {
     }
   }, [event]);
 
+  const handleRegister = async () => {
+    try {
+      await registerForEvent(id);
+      alert('Successfully registered!');
+      loadEvent();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
   };
@@ -176,6 +186,13 @@ const EventDetails = () => {
       </Container>
     );
   }
+
+  const participantCount =
+    Array.isArray(event?.roles)
+      ? (event.roles.find(r => r.role === 'Runner')?.current_count ?? 0)
+      : (Array.isArray(event?.participants)
+          ? event.participants.length
+          : (event?.participant_count ?? 0));
 
   return (
     <>
@@ -291,7 +308,7 @@ const EventDetails = () => {
             )}
             <Chip
               icon={<PeopleIcon />}
-              label={`${event.participant_count || 0} participants`}
+              label={`${participantCount} participants`}
               variant="outlined"
               sx={{ height: '40px', fontSize: '1rem' }}
             />
@@ -517,7 +534,7 @@ const EventDetails = () => {
                 size="large"
                 fullWidth
                 sx={{ maxWidth: 400 }}
-                onClick={() => alert('Registered')}
+                onClick={handleRegister}
               >
                 Register 
               </Button>

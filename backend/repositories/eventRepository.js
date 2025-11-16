@@ -1,5 +1,4 @@
-
-  // References: 1) "This SQL query for getEventsRepository function was generated using the help of chat-gpt to help create a dynamic script.
+// References: 1) "This SQL query for getEventsRepository function was generated using the help of chat-gpt to help create a dynamic script.
   //               "This transcript: "I want a postgresql query that uses a base query to retrieve all rows in the
   //                events table, use the Haversine formula to calculate the distance in miles between
   //                the input user latitude and longitude as lat and lng. Include support to this query by
@@ -156,6 +155,42 @@ export const createEventRepository = async(eventData) => {
   return rows;
 }
 
+/**
+ * 
+ * @param {*} eventId 
+ * @param {*} role 
+ * @param {*} roleLimit 
+ * @returns 
+ */
+export const getEventIdByNameRepository = async(eventName) => {
+  const query = `
+    SELECT event_id FROM events WHERE name = $1
+  `;
+
+  const params = [eventName];
+  const { rows } = await pool.query(query, params);
+  return rows[0];
+}
+/**
+ * Sets the roleLimit for a specific role in an event.
+ * @param {*} eventId 
+ * @param {*} role 
+ * @param {*} roleLimit 
+ * @returns 
+ */
+export const createEventRoleRepository = async(eventId, role, roleLimit) => {
+  const query = `
+    INSERT INTO event_roles (event_id, role, role_limit)
+    VALUES ($1, $2, $3)
+    RETURNING *
+  `;
+
+  const params = [eventId, role, roleLimit];
+  const { rows } = await pool.query(query, params);
+  return rows[0];
+}
+
+
 export const updateEventRepository = async (eventId, newData) => {
   // COALESCE allows the code to use new data if it is not null
   const query = `
@@ -205,13 +240,23 @@ export const deleteEventRepository = async (eventId) => {
 
 export const registerForEventRepository = async (eventId, userId, role) => {
   const query = `
-  INSERT INTO registrations (event_id, user_id, role)
-  VALUES ($1, $2, $3)
-  RETURNING *;`
+    INSERT INTO registrations (event_id, user_id, role)
+    VALUES ($1, $2, $3)
+    RETURNING *;
+  `;
+  const params = [eventId, userId, role];
   
-  const { rows } = await pool.query(query, [eventId, userId, role]);
+  // Create a formatted version with actual values
+  const formattedQuery = query.replace(/\$(\d+)/g, (match, index) => {
+    const value = params[index - 1];
+    return typeof value === 'string' ? `'${value}'` : value;
+  });
+  
+  console.log('Full query:', formattedQuery);
+  
+  const { rows } = await pool.query(query, params);
   return rows[0];
-}
+};
 
 
 export const unregisterForEventRepository = async (eventId, userId) => {
@@ -229,9 +274,28 @@ export const getEventByIdRepository = async (eventId) => {
   // Utilized AI to help return lists of data from other tables.
   const query = `SELECT e.*,
 
-              (SELECT json_agg(json_build_object('role', er.role, 'role_limit', er.role_limit))
-              FROM event_roles er
-              WHERE er.event_id = e.event_id) AS roles,
+              (
+                SELECT json_agg(
+                  json_build_object(
+                    'role', t.role,
+                    'role_limit', t.role_limit,
+                    'current_count', t.current_count
+                  )
+                )
+                FROM (
+                  SELECT 
+                    er.role,
+                    er.role_limit,
+                    COUNT(r.user_id) AS current_count
+                  FROM event_roles er
+                  LEFT JOIN registrations r
+                    ON r.event_id = er.event_id
+                   AND r.role = er.role
+                  WHERE er.event_id = e.event_id
+                  GROUP BY er.role, er.role_limit
+                  ORDER BY er.role
+                ) t
+              ) AS roles,
               
               (SELECT json_agg(json_build_object('id', es.id, 'sponsor', es.sponsor, 'prize', es.prize))
               FROM event_sponsors es
