@@ -1,18 +1,49 @@
-import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService, getVolunteersForEventService, getFinalistsService, getRunnersService, getParticipantsService } from "../services/eventService.js"
+import {
+    createEventService,
+    deleteEventService,
+    getEventByIdService,
+    getEventsService,
+    getFeaturedEventsService,
+    updateEventService,
+    registerForEventService,
+    unregisterForEventService,
+    getVolunteersForEventService,
+    getFinalistsService,
+    getRunnersService,
+    getParticipantsService
+} from "../services/eventService.js"
 import pool from "../server.js";
 
 
 export const getEvents = async (req, res) => {
     try {
-    const { sortBy, radius, lat, lng, minParticipants, dateFilter, startDate, endDate } = req.query;
+        const {
+            sortBy,
+            radius,
+            lat,
+            lng,
+            minParticipants,
+            dateFilter,
+            startDate,
+            endDate
+        } = req.query;
 
-    const events = await getEventsService({ sortBy, radius, lat, lng, minParticipants, dateFilter, startDate, endDate });
-    res.status(200).json(events);
+        const events = await getEventsService({ 
+            sortBy,
+            radius,
+            lat,
+            lng,
+            minParticipants,
+            dateFilter,
+            startDate,
+            endDate
+        });
+        res.status(200).json(events);
 
-  } catch (err) {
-    console.error("Error fetching events:", err);
-    res.status(500).json({ error: "Failed to fetch events" });
-        }
+    } catch (err) {
+        console.error("Error fetching events:", err);
+        res.status(500).json({ error: "Failed to fetch events" });
+            }
 };
 
 // returns top 3 events by participant count, if less than 3 events exist, will return however many exists < 3.
@@ -149,8 +180,10 @@ export const getVolunteers = async(req, res) => {
     const count = volunteers.length
     res.status(200).json({volunteers, count})
 
-  } catch (error) {
-    res.status(400).json({ error: "failed to retrieve list of volunteers for this event"})
+  } catch {
+    res.status(400).json({
+        error: "failed to retrieve list of volunteers for this event"
+    })
   } 
 }
 
@@ -188,7 +221,7 @@ export const getParticipants = async (req, res) => {
     const participants = await getParticipantsService(eventId)
     const count = participants.length
     res.status(200).json({participants, count})
-  } catch (error) {
+  } catch {
     console.error("Error in controller when retrieving all participants for this event")
     res.status(400).json({error: "failed to retrieve all participants"})
   }
