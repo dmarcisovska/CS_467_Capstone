@@ -33,7 +33,7 @@ const Create = () => {
     startTime: null,
     description: '',
     runners: '',
-    startOfficials: '1', // Default to 1
+    startOfficials: '', // Remove default value
     finishOfficials: '',
     address: '',
     latitude: null,
@@ -317,19 +317,13 @@ const Create = () => {
                   <TextField
                     fullWidth
                     name="startOfficials"
-                    label="Starting Officials (always 1)"
+                    label="Max Number of Starting Officials"
                     value={formData.startOfficials}
+                    onChange={handleChange}
                     variant="filled"
                     type="number"
-                    disabled
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    sx={{
-                      '& .MuiInputBase-input.Mui-disabled': {
-                        WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
-                      },
-                    }}
+                    required
+                    inputProps={{ min: 1, step: 1 }}
                   />
 
                   <TextField
