@@ -16,6 +16,14 @@ export const createEventService = async (eventData) => {
   return await eventRepository.createEventRepository(eventData);
 }
 
+export const getEventIdByName = async (eventName) => {
+  return await eventRepository.getEventIdByNameRepository(eventName);
+}
+
+export const createEventRoleService = async (eventId, role, roleLimit) => {
+  return await eventRepository.createEventRoleRepository(eventId, role, roleLimit);
+}
+
 export const updateEventService = async (eventId, newData) => {
   return await eventRepository.updateEventRepository(eventId, newData);
 }

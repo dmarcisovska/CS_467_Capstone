@@ -1,5 +1,7 @@
 import {
     createEventService,
+    getEventIdByName,
+    createEventRoleService,
     deleteEventService,
     getEventByIdService,
     getEventsService,
@@ -63,7 +65,20 @@ export const createEvent = async (req, res) => {
     const eventData = req.body;   
     const { sponsors, prizes, ...eventFields } = eventData;
     const newEvent = await createEventService(eventFields);
-        if (sponsors || prizes) {
+    
+    // Set role limits for the event
+    // Because event_id is automatically generated and event names are unique,
+    // we are able to find our new event's id from its name
+    const eventIdContainer = await getEventIdByName(eventData.name);
+    const eventId = eventIdContainer.event_id;
+
+    console.log(`runners=${eventData.runners}; starts=${eventData.startOfficials}, finishs=${eventData.finishOfficials}`);
+
+    await createEventRoleService(eventId, "Runner", eventData.max_runners);
+    await createEventRoleService(eventId, "Starting Official", eventData.max_start_officials);
+    await createEventRoleService(eventId, "Finish Line Official", eventData.max_finish_officials);
+
+    if (sponsors || prizes) {
       await pool.query(
         `INSERT INTO event_sponsors (event_id, sponsor, prize)
          VALUES ($1, $2, $3)`,
@@ -98,7 +113,7 @@ export const updateEvent = async (req, res) => {
     const eventData = req.body;
     
     const { sponsors, prizes, ...eventFields } = eventData;
-    
+
     const updatedEvent = await updateEventService(id, eventFields);
     
     if (!updatedEvent || updatedEvent.length === 0) {
@@ -142,11 +157,12 @@ export const deleteEvent = async (req, res) => {
 
 export const registerForEvent = async (req, res) => {
     const { eventId } = req.params;
-    const {user_id, role} = req.body;
+    const { user_id, role } = req.body;
 
     try {
       const result = await registerForEventService(eventId, user_id, role)
       return res.status(201).json(result)
+
     } catch (error) {
       console.error("Register error:", error);
 

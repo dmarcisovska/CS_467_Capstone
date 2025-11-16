@@ -155,6 +155,42 @@ export const createEventRepository = async(eventData) => {
   return rows;
 }
 
+/**
+ * 
+ * @param {*} eventId 
+ * @param {*} role 
+ * @param {*} roleLimit 
+ * @returns 
+ */
+export const getEventIdByNameRepository = async(eventName) => {
+  const query = `
+    SELECT event_id FROM events WHERE name = $1
+  `;
+
+  const params = [eventName];
+  const { rows } = await pool.query(query, params);
+  return rows[0];
+}
+/**
+ * Sets the roleLimit for a specific role in an event.
+ * @param {*} eventId 
+ * @param {*} role 
+ * @param {*} roleLimit 
+ * @returns 
+ */
+export const createEventRoleRepository = async(eventId, role, roleLimit) => {
+  const query = `
+    INSERT INTO event_roles (event_id, role, role_limit)
+    VALUES ($1, $2, $3)
+    RETURNING *
+  `;
+
+  const params = [eventId, role, roleLimit];
+  const { rows } = await pool.query(query, params);
+  return rows[0];
+}
+
+
 export const updateEventRepository = async (eventId, newData) => {
   // COALESCE allows the code to use new data if it is not null
   const query = `
@@ -204,13 +240,23 @@ export const deleteEventRepository = async (eventId) => {
 
 export const registerForEventRepository = async (eventId, userId, role) => {
   const query = `
-  INSERT INTO registrations (event_id, user_id, role)
-  VALUES ($1, $2, $3)
-  RETURNING *;`
+    INSERT INTO registrations (event_id, user_id, role)
+    VALUES ($1, $2, $3)
+    RETURNING *;
+  `;
+  const params = [eventId, userId, role];
   
-  const { rows } = await pool.query(query, [eventId, userId, role]);
+  // Create a formatted version with actual values
+  const formattedQuery = query.replace(/\$(\d+)/g, (match, index) => {
+    const value = params[index - 1];
+    return typeof value === 'string' ? `'${value}'` : value;
+  });
+  
+  console.log('Full query:', formattedQuery);
+  
+  const { rows } = await pool.query(query, params);
   return rows[0];
-}
+};
 
 
 export const unregisterForEventRepository = async (eventId, userId) => {
