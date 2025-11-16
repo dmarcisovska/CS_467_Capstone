@@ -33,7 +33,7 @@ const Create = () => {
     startTime: null,
     description: '',
     runners: '',
-    startOfficials: '',
+    startOfficials: '1', // Default to 1
     finishOfficials: '',
     address: '',
     latitude: null,
@@ -303,39 +303,45 @@ const Create = () => {
                   />
 
                   <TextField
-                    // Sam added
                     fullWidth
                     name="runners"
-                    label="Max Number of Runners?"
+                    label="Max Number of Runners"
                     value={formData.runners}
                     onChange={handleChange}
                     variant="filled"
                     type="number"
-                    inputProps={{ min: 1, step: 'any' }}
+                    required
+                    inputProps={{ min: 1, step: 1 }}
                   />
 
                   <TextField
-                    // Sam added
                     fullWidth
                     name="startOfficials"
-                    label="Max Number of Officials?"
+                    label="Starting Officials (always 1)"
                     value={formData.startOfficials}
-                    onChange={handleChange}
                     variant="filled"
                     type="number"
-                    inputProps={{ min: 1, step: 'any' }}
+                    disabled
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    sx={{
+                      '& .MuiInputBase-input.Mui-disabled': {
+                        WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                      },
+                    }}
                   />
 
                   <TextField
-                    // Sam added
                     fullWidth
                     name="finishOfficials"
-                    label="Max Number of Finish Line Officials?"
+                    label="Max Number of Finish Line Officials"
                     value={formData.finishOfficials}
                     onChange={handleChange}
                     variant="filled"
                     type="number"
-                    inputProps={{ min: 1, step: 'any' }}
+                    required
+                    inputProps={{ min: 1, step: 1 }}
                   />
 
                   <Typography variant="h6" sx={{ mt: 3, mb: 1, width: '100%' }}>
