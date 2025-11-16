@@ -32,6 +32,9 @@ const Create = () => {
     date: null,
     startTime: null,
     description: '',
+    runners: '',
+    startOfficials: '',
+    finishOfficials: '',
     address: '',
     latitude: null,
     longitude: null,
@@ -98,7 +101,15 @@ const Create = () => {
     setSuccess('');
     
     // Validation
-    if (!formData.name || !formData.date || !formData.startTime || !formData.address) {
+    if (
+        !formData.name || 
+        !formData.date || 
+        !formData.startTime || 
+        !formData.address ||
+        !formData.runners ||
+        !formData.startOfficials ||
+        !formData.finishOfficials
+    ) {
       setError('Please fill in all required fields');
       return;
     }
@@ -126,11 +137,14 @@ const Create = () => {
         latitude: formData.latitude,
         longitude: formData.longitude,
         description: formData.description || null,
+        max_runners: parseInt(formData.runners),
+        max_start_officials: parseInt(formData.startOfficials),
+        max_finish_officials: parseInt(formData.finishOfficials),
         distance: parseFloat(formData.distance) || null,
         elevation: parseFloat(formData.elevation) || null,
         difficulty: formData.difficulty || null,
-        sponsors: formData.sponsors || null,  // Add this
-        prizes: formData.prizes || null,       // Add this
+        sponsors: formData.sponsors || null,
+        prizes: formData.prizes || null,
       };
 
       console.log('Creating event:', eventData);
@@ -286,6 +300,42 @@ const Create = () => {
                     fullWidth
                     multiline
                     rows={4}
+                  />
+
+                  <TextField
+                    // Sam added
+                    fullWidth
+                    name="runners"
+                    label="Max Number of Runners?"
+                    value={formData.runners}
+                    onChange={handleChange}
+                    variant="filled"
+                    type="number"
+                    inputProps={{ min: 1, step: 'any' }}
+                  />
+
+                  <TextField
+                    // Sam added
+                    fullWidth
+                    name="startOfficials"
+                    label="Max Number of Officials?"
+                    value={formData.startOfficials}
+                    onChange={handleChange}
+                    variant="filled"
+                    type="number"
+                    inputProps={{ min: 1, step: 'any' }}
+                  />
+
+                  <TextField
+                    // Sam added
+                    fullWidth
+                    name="finishOfficials"
+                    label="Max Number of Finish Line Officials?"
+                    value={formData.finishOfficials}
+                    onChange={handleChange}
+                    variant="filled"
+                    type="number"
+                    inputProps={{ min: 1, step: 'any' }}
                   />
 
                   <Typography variant="h6" sx={{ mt: 3, mb: 1, width: '100%' }}>
