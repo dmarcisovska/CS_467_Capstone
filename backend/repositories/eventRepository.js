@@ -224,6 +224,17 @@ export const unregisterForEventRepository = async (eventId, userId) => {
   return rows[0];
 }
 
+export const updateRoleForEventRepository = async (eventId, userId, newRole) => {
+  const query = `
+  UPDATE registrations
+  SET role = $3
+  WHERE event_id = $1 AND user_id = $2
+  RETURNING *`;
+  
+  const { rows } = await pool.query(query, [eventId, userId, newRole]);
+  return rows[0];
+}
+
 export const getEventByIdRepository = async (eventId) => {
   try {
   // Utilized AI to help return lists of data from other tables.

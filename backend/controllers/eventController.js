@@ -1,4 +1,4 @@
-import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService, getVolunteersForEventService, getFinalistsService, getRunnersService, getParticipantsService } from "../services/eventService.js"
+import { createEventService, deleteEventService, getEventByIdService, getEventsService, getFeaturedEventsService, updateEventService, registerForEventService, unregisterForEventService, updateRoleForEventService, getVolunteersForEventService, getFinalistsService, getRunnersService, getParticipantsService } from "../services/eventService.js"
 import pool from "../server.js";
 
 
@@ -136,6 +136,21 @@ export const unregisterForEvent = async (req, res) => {
     // eslint-disable-next-line no-unused-vars
     } catch (error) {
     res.status(400).json({ error: "failed to unregister from event"})
+    }
+  
+};
+
+export const updateRoleForEvent = async (req, res) => {
+  const { eventId, userId } = req.params;
+  const { newRole } = req.body;
+
+  try {
+      await updateRoleForEventService(eventId, userId, newRole);
+      res.status(200).json({ message: "Successfully chnaged role"});
+
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+    res.status(400).json({ error: "Failed to change role for event"})
     }
   
 };
