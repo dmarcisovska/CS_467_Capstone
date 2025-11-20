@@ -193,7 +193,6 @@ function ResponsiveAppBar() {
               color: 'inherit',
             }}
           >
-            {/* Remove LOGO text, icon is enough */}
           </Typography>
 
           {/* Desktop links */}
