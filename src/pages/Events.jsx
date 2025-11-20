@@ -334,9 +334,6 @@ const Events = () => {
                         >
                           View Details
                         </Button>
-                        <Button variant="outlined" size="small" color="primary">
-                          Register
-                        </Button>
                       </CardActions>
                     </Card>
                   </Box>
