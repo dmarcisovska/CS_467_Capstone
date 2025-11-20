@@ -167,7 +167,17 @@ function ResponsiveAppBar() {
           </Box>
 
           {/* Mobile logo */}
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          <IconButton
+            component={NavLink}
+            to="/"
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              mr: 1,
+              color: 'primary.main',
+            }}
+          >
+            <DirectionsRunIcon />
+          </IconButton>
           <Typography
             variant="h5"
             noWrap
@@ -183,7 +193,6 @@ function ResponsiveAppBar() {
               color: 'inherit',
             }}
           >
-            LOGO
           </Typography>
 
           {/* Desktop links */}
