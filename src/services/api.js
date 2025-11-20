@@ -234,14 +234,8 @@ export const unregisterFromEvent = async (eventId) => {
             throw new Error('Must be logged in to unregister from event');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/unregister`, {
+        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register/${user.user_id}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-                body: JSON.stringify({
-                user_id: user.user_id,
-            }),
         });
 
         const data = await response.json();

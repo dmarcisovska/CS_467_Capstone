@@ -38,6 +38,8 @@ const EventDetails = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -48,7 +50,14 @@ const EventDetails = () => {
       setLoading(true);
       setError(null);
       const data = await fetchEventById(id);
-      setEvent(data);
+      setEvent(data);     
+      const storedUser = localStorage.getItem('user');
+      if (storedUser && data.participants) {
+        const user = JSON.parse(storedUser);        
+        const userIsRegistered = data.participants.some(p => p.user_id === user.user_id);
+        setIsRegistered(userIsRegistered);
+      }
+      
       console.log('Event loaded:', data);
     } catch (err) {
       setError('Failed to load event details.');
@@ -139,12 +148,27 @@ const EventDetails = () => {
       return;
     }
 
+    setRegistering(true);
+    
     try {
-      await registerForEvent(id);
-      alert('Successfully registered!');
+      if (isRegistered) {
+        // Unregister
+        await unregisterFromEvent(id);
+        setIsRegistered(false);
+      } else {
+        // Register
+        await registerForEvent(id);
+        setIsRegistered(true);
+      }
       loadEvent();
     } catch (err) {
+      // If already registered, backend returns 409
+      if (err.message.includes('Already registered')) {
+        setIsRegistered(true);
+      }
       alert(err.message);
+    } finally {
+      setRegistering(false);
     }
   };
 
@@ -541,8 +565,16 @@ const EventDetails = () => {
                 fullWidth
                 sx={{ maxWidth: 400 }}
                 onClick={handleRegister}
+                disabled={registering}
+                color={isRegistered ? 'error' : 'primary'}
               >
-                Register 
+                {registering ? (
+                  <CircularProgress size={24} sx={{ color: 'white' }} />
+                ) : isRegistered ? (
+                  'Unregister'
+                ) : (
+                  'Register'
+                )}
               </Button>
             </Box>
           </Stack>
