@@ -271,7 +271,6 @@ export const unregisterForEventRepository = async (eventId, userId) => {
 
 export const getEventByIdRepository = async (eventId) => {
   try {
-  // Utilized AI to help return lists of data from other tables.
   const query = `SELECT e.*,
 
               (
@@ -315,7 +314,22 @@ export const getEventByIdRepository = async (eventId) => {
                   ON r.user_id = u.user_id
                 WHERE r.event_id = e.event_id
                 AND r.role <> 'Runner'
-                ) AS volunteers
+                ) AS volunteers,
+                
+              (SELECT json_agg(json_build_object(
+                'user_id', u.user_id,
+                'username', u.username,
+                'email', u.email,
+                'avatar_url', u.avatar_url
+                  )
+                )
+                FROM registrations r
+                JOIN users u
+                  ON r.user_id = u.user_id
+                WHERE r.event_id = e.event_id
+                AND r.role = 'Runner'
+                ) AS participants
+                
                 FROM events e
                 WHERE e.event_id = $1`;
   
