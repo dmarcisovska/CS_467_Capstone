@@ -18,7 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import titleImg from '../assets/gigi-bIpKSEsaN6Q-unsplash.jpg';
-import { fetchEvents } from '../services/api';
+import { fetchEvents, registerForEvent, unregisterFromEvent } from '../services/api';
 // import cardImg from '../assets/trail.jpg'; // unused
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
@@ -31,6 +31,8 @@ const Events = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
+  const [registeringId, setRegisteringId] = useState(null);
+  const [registeredEvents, setRegisteredEvents] = useState(new Set());
 
 
   useEffect(() => {
@@ -72,11 +74,25 @@ const Events = () => {
       });
       
       console.log('Events received:', data);
-      console.log('First event distance:', data[0]?.distance_miles);
+      
+      // Check which events user is registered for
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const registered = new Set();
+        data.forEach(event => {
+          // Check if participants array exists and includes current user
+          if (event.participants && Array.isArray(event.participants)) {
+            if (event.participants.some(p => p.user_id === user.user_id)) {
+              registered.add(event.event_id);
+            }
+          }
+        });
+        setRegisteredEvents(registered);
+      }
       
       if (isBackgroundRefresh) {
         setEvents(prevEvents => {
-          
           // compare data to prevent unnecessary re-renders
           if (JSON.stringify(prevEvents) === JSON.stringify(data)) {
             return prevEvents; // prevents re-render
@@ -114,6 +130,43 @@ const Events = () => {
       Hard: 'error',
     };
     return colors[difficulty] || 'default';
+  };
+
+  const handleRegister = async (eventId) => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
+      navigate('/login');
+      return;
+    }
+
+    setRegisteringId(eventId);
+    
+    try {
+      const isRegistered = registeredEvents.has(eventId);
+      
+      if (isRegistered) {
+        // Unregister
+        await unregisterFromEvent(eventId);
+        setRegisteredEvents(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(eventId);
+          return newSet;
+        });
+      } else {
+        // Register
+        await registerForEvent(eventId);
+        setRegisteredEvents(prev => new Set(prev).add(eventId));
+      }
+      
+      await loadEvents(false);
+    } catch (err) {
+      if (err.message.includes('Already registered')) {
+        setRegisteredEvents(prev => new Set(prev).add(eventId));
+      }
+      alert(err.message);
+    } finally {
+      setRegisteringId(null);
+    }
   };
 
   // Initial event data fetch on page load
@@ -246,101 +299,118 @@ const Events = () => {
                   gap: 2,
                 }}
               >
-                {events.map((event) => (
-                  <Box
-                    key={event.event_id}
-                    sx={{
-                      flex: { xs: '1 1 100%', md: '1 1 calc(50% - 16px)' },
-                      display: 'flex',
-                    }}
-                  >
-                    <Card
+                {events.map((event) => {
+                  const isRegistered = registeredEvents.has(event.event_id);
+                  const isRegistering = registeringId === event.event_id;
+                  
+                  return (
+                    <Box
+                      key={event.event_id}
                       sx={{
-                        flexGrow: 1,
+                        flex: { xs: '1 1 100%', md: '1 1 calc(50% - 16px)' },
                         display: 'flex',
-                        flexDirection: 'column',
                       }}
                     >
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography gutterBottom variant="h5" component="h2">
-                          {event.name}
-                        </Typography>
-
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 2 }}
-                        >
-                          {event.description}
-                        </Typography>
-
-                        <Stack spacing={1}>
-                          <Typography variant="body2">
-                            <strong>Date:</strong>{' '}
-                            {formatDate(event.event_datetime)}
+                      <Card
+                        sx={{
+                          flexGrow: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Typography gutterBottom variant="h5" component="h2">
+                            {event.name}
                           </Typography>
 
-                          {event.distance_miles && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <LocationOnIcon fontSize="small" color="primary" />
-                              <Typography variant="body2">
-                                <strong>{Math.round(event.distance_miles)}</strong> miles away
-                              </Typography>
-                            </Box>
-                          )}
-
-                          <Typography variant="body2">
-                            <strong>Distance:</strong> {event.distance} miles
-                          </Typography>
-
-                          {event.elevation && (
-                            <Typography variant="body2">
-                              <strong>Elevation:</strong> {event.elevation} ft
-                            </Typography>
-                          )}
-
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              gap: 1,
-                              flexWrap: 'wrap',
-                              mt: 1,
-                            }}
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 2 }}
                           >
-                            {event.difficulty && (
-                              <Chip
-                                label={event.difficulty}
-                                color={getDifficultyColor(event.difficulty)}
-                                size="small"
-                              />
-                            )}
-                            <Chip
-                              label={`${
-                                event.participant_count || 0
-                              } participants`}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Box>
-                        </Stack>
-                      </CardContent>
+                            {event.description}
+                          </Typography>
 
-                      <CardActions sx={{ mb: 2 }}>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          color="primary"
-                          onClick={() => navigate(`/events/${event.event_id}`)}
-                        >
-                          View Details
-                        </Button>
-                        <Button variant="outlined" size="small" color="primary">
-                          Register
-                        </Button>
-                      </CardActions>
-                    </Card>
-                  </Box>
-                ))}
+                          <Stack spacing={1}>
+                            <Typography variant="body2">
+                              <strong>Date:</strong>{' '}
+                              {formatDate(event.event_datetime)}
+                            </Typography>
+
+                            {event.distance_miles && (
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <LocationOnIcon fontSize="small" color="primary" />
+                                <Typography variant="body2">
+                                  <strong>{Math.round(event.distance_miles)}</strong> miles away
+                                </Typography>
+                              </Box>
+                            )}
+
+                            <Typography variant="body2">
+                              <strong>Distance:</strong> {event.distance} miles
+                            </Typography>
+
+                            {event.elevation && (
+                              <Typography variant="body2">
+                                <strong>Elevation:</strong> {event.elevation} ft
+                              </Typography>
+                            )}
+
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                gap: 1,
+                                flexWrap: 'wrap',
+                                mt: 1,
+                              }}
+                            >
+                              {event.difficulty && (
+                                <Chip
+                                  label={event.difficulty}
+                                  color={getDifficultyColor(event.difficulty)}
+                                  size="small"
+                                />
+                              )}
+                              <Chip
+                                label={`${
+                                  event.participant_count || 0
+                                } participants`}
+                                size="small"
+                                variant="outlined"
+                              />
+                            </Box>
+                          </Stack>
+                        </CardContent>
+
+                        <CardActions sx={{ mb: 2 }}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            onClick={() => navigate(`/events/${event.event_id}`)}
+                          >
+                            View Details
+                          </Button>
+                          <Button 
+                            variant="outlined" 
+                            size="small" 
+                            color={isRegistered ? 'error' : 'primary'}
+                            onClick={() => handleRegister(event.event_id)}
+                            disabled={isRegistering}
+                          >
+                            {isRegistering ? (
+                              <CircularProgress size={20} />
+                            ) : isRegistered ? (
+                              'Unregister'
+                            ) : (
+                              'Register'
+                            )}
+                          </Button>
+                        </CardActions>
+                      </Card>
+                    </Box>
+                  );
+                })}
               </Box>
             )}
           </>

@@ -39,7 +39,13 @@ export const getEventsRepository = async (filters = {}) => {
           )
         )
         ELSE NULL
-      END AS distance_miles
+      END AS distance_miles,
+      (
+        SELECT json_agg(json_build_object('user_id', u.user_id, 'username', u.username))
+        FROM registrations reg
+        JOIN users u ON reg.user_id = u.user_id
+        WHERE reg.event_id = e.event_id AND reg.role = 'Runner'
+      ) AS participants
     FROM events e
     LEFT JOIN registrations r ON e.event_id = r.event_id
   `;
