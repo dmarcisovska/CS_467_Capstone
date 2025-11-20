@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import EventDetails from './pages/EventDetails';
 import Profile from './pages/Profile';
 import EditEvent from './pages/EditEvent';
+import RaceDay from './pages/RaceDay';
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/profile' element={<Profile />} />
+        <Route path='/raceday/:id' element={<RaceDay />} />
       </Routes>
     </>
   )

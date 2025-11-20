@@ -25,6 +25,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
+import TimerIcon from '@mui/icons-material/Timer';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -305,6 +306,26 @@ const EventDetails = () => {
                 This event has already taken place.
               </Alert>
             )}
+      
+        {isRegistered && (
+          <Button
+            variant="contained"
+            color="success"
+            size="large"
+            fullWidth
+            startIcon={<TimerIcon sx={{ color: 'white' }} />}
+            sx={{ 
+              mb: 3,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              color: 'white',
+            }}
+            onClick={() => navigate(`/raceday/${id}`)}
+          >
+            Go to Race Day
+          </Button>
+        )}
 
         <Paper sx={{ p: 4, position: 'relative' }}>
           {/* Show Edit and Delete buttons if user is the creator */}
