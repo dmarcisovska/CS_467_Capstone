@@ -133,6 +133,12 @@ const EventDetails = () => {
   }, [event]);
 
   const handleRegister = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) { 
+      navigate('/login');
+      return;
+    }
+
     try {
       await registerForEvent(id);
       alert('Successfully registered!');
