@@ -202,6 +202,13 @@ export const registerForEvent = async (eventId, role = 'Runner') => {
         if (!user) {
             throw new Error('Must be logged in to register for event');
         }
+
+        console.log('=== registerForEvent API CALL ===');
+        console.log('Event ID:', eventId);
+        console.log('User ID:', user.user_id);
+        console.log('Role:', role);
+        console.log('URL:', `${API_BASE_URL}/api/events/${eventId}/register`);
+
         const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register`, {
             method: 'POST',
             headers: {
@@ -213,10 +220,15 @@ export const registerForEvent = async (eventId, role = 'Runner') => {
             }),
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
         const data = await response.json();
+        console.log('Response data:', data);
 
         if (!response.ok) {
-            throw new Error(data.error || 'Failed to register for event');
+            // Include the actual error message from backend
+            throw new Error(data.error || data.message || 'Failed to register for event');
         }
         return data;
 
