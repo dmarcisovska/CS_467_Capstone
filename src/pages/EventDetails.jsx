@@ -41,6 +41,8 @@ const EventDetails = () => {
   const [deleting, setDeleting] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [isVolunteer, setIsVolunteer] = useState(false);
+  const [volunteering, setVolunteering] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -53,10 +55,20 @@ const EventDetails = () => {
       const data = await fetchEventById(id);
       setEvent(data);     
       const storedUser = localStorage.getItem('user');
-      if (storedUser && data.participants) {
-        const user = JSON.parse(storedUser);        
-        const userIsRegistered = data.participants.some(p => p.user_id === user.user_id);
-        setIsRegistered(userIsRegistered);
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        
+        // Check if registered as Runner
+        if (data.participants) {
+          const userIsRegistered = data.participants.some(p => p.user_id === user.user_id);
+          setIsRegistered(userIsRegistered);
+        }
+        
+        // Check if registered as Volunteer
+        if (data.volunteers) {
+          const userIsVolunteer = data.volunteers.some(v => v.user_id === user.user_id && v.role === 'Volunteer');
+          setIsVolunteer(userIsVolunteer);
+        }
       }
       
       console.log('Event loaded:', data);
@@ -170,6 +182,36 @@ const EventDetails = () => {
       alert(err.message);
     } finally {
       setRegistering(false);
+    }
+  };
+
+  const handleVolunteer = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) { 
+      navigate('/login');
+      return;
+    }
+
+    setVolunteering(true);
+    
+    try {
+      if (isVolunteer) {
+        // Unregister as volunteer
+        await unregisterFromEvent(id);
+        setIsVolunteer(false);
+      } else {
+        // Register as volunteer
+        await registerForEvent(id, 'Volunteer');
+        setIsVolunteer(true);
+      }
+      loadEvent();
+    } catch (err) {
+      if (err.message.includes('Already registered')) {
+        setIsVolunteer(true);
+      }
+      alert(err.message);
+    } finally {
+      setVolunteering(false);
     }
   };
 
@@ -580,23 +622,43 @@ const EventDetails = () => {
             )}
 
             <Box sx={{ pt: 2 }}>
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                sx={{ maxWidth: 400 }}
-                onClick={handleRegister}
-                disabled={registering}
-                color={isRegistered ? 'error' : 'primary'}
-              >
-                {registering ? (
-                  <CircularProgress size={24} sx={{ color: 'white' }} />
-                ) : isRegistered ? (
-                  'Unregister'
-                ) : (
-                  'Register'
-                )}
-              </Button>
+              <Stack spacing={2}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  sx={{ maxWidth: 400 }}
+                  onClick={handleRegister}
+                  disabled={registering}
+                  color={isRegistered ? 'error' : 'primary'}
+                >
+                  {registering ? (
+                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                  ) : isRegistered ? (
+                    'Unregister as Runner'
+                  ) : (
+                    'Register as Runner'
+                  )}
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  size="large"
+                  fullWidth
+                  sx={{ maxWidth: 400 }}
+                  onClick={handleVolunteer}
+                  disabled={volunteering}
+                  color={isVolunteer ? 'error' : 'primary'}
+                >
+                  {volunteering ? (
+                    <CircularProgress size={24} />
+                  ) : isVolunteer ? (
+                    'Unregister as Volunteer'
+                  ) : (
+                    'Register as Volunteer'
+                  )}
+                </Button>
+              </Stack>
             </Box>
           </Stack>
         </Paper>
