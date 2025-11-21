@@ -16,7 +16,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent } from '../services/api';
+import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent, API_BASE_URL } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -192,24 +192,50 @@ const EventDetails = () => {
       return;
     }
 
+    console.log('=== VOLUNTEER REGISTRATION DEBUG ===');
+    console.log('Event ID:', id);
+    console.log('Is already runner:', isRegistered);
+    console.log('Is already volunteer:', isVolunteer);
+
     setVolunteering(true);
     
     try {
       if (isVolunteer) {
-        // Unregister as volunteer
+        console.log('Unregistering as volunteer...');
         await unregisterFromEvent(id);
         setIsVolunteer(false);
+        alert('Unregistered as volunteer');
       } else {
-        // Register as volunteer
+        // Check if already registered as runner
+        if (isRegistered) {
+          console.log('User is already a runner, asking to switch...');
+          const confirmSwitch = window.confirm(
+            'You are already registered as a Runner. Do you want to switch to Volunteer instead?'
+          );
+          if (!confirmSwitch) {
+            setVolunteering(false);
+            return;
+          }
+          console.log('Unregistering from runner...');
+          await unregisterFromEvent(id);
+          setIsRegistered(false);
+        }
+        
+        console.log('Registering as volunteer...');
         await registerForEvent(id, 'Volunteer');
         setIsVolunteer(true);
+        alert('Successfully registered as volunteer!');
       }
       loadEvent();
     } catch (err) {
+      console.error('Volunteer registration error:', err);
+      console.error('Error message:', err.message);
+      
       if (err.message.includes('Already registered')) {
-        setIsVolunteer(true);
+        alert('You are already registered for this event with a different role. Please unregister first using the other button.');
+      } else {
+        alert('Registration failed: ' + err.message);
       }
-      alert(err.message);
     } finally {
       setVolunteering(false);
     }
@@ -233,6 +259,34 @@ const EventDetails = () => {
       alert('Failed to delete event: ' + err.message);
       setDeleting(false);
       setDeleteDialogOpen(false);
+    }
+  };
+
+  const checkRegistrationStatus = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+    
+    const user = JSON.parse(storedUser);
+    console.log('=== CHECKING REGISTRATION STATUS ===');
+    console.log('User ID:', user.user_id);
+    console.log('Event ID:', id);
+    
+    try {
+      // Fetch all participants
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/participants`);
+      const data = await response.json();
+      console.log('All participants:', data.participants);
+      
+      const myRegistration = data.participants?.find(p => p.user_id === user.user_id);
+      console.log('My registration:', myRegistration);
+      
+      if (myRegistration) {
+        alert(`You ARE registered as: ${myRegistration.role}`);
+      } else {
+        alert('You are NOT registered for this event');
+      }
+    } catch (err) {
+      console.error('Check failed:', err);
     }
   };
 
@@ -623,6 +677,18 @@ const EventDetails = () => {
 
             <Box sx={{ pt: 2 }}>
               <Stack spacing={2}>
+                {/* DEBUG BUTTON - Remove after testing */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  sx={{ maxWidth: 400 }}
+                  onClick={checkRegistrationStatus}
+                  color="secondary"
+                >
+                  🔍 Debug: Check My Registration Status
+                </Button>
+
                 <Button
                   variant="contained"
                   size="large"

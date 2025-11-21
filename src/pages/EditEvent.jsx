@@ -25,6 +25,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Divider from '@mui/material/Divider';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import { API_BASE_URL } from '../services/api';
+import Paper from '@mui/material/Paper';
 
 const EditEvent = () => {
   const { id } = useParams();

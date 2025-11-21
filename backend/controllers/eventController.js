@@ -159,17 +159,48 @@ export const registerForEvent = async (req, res) => {
     const { eventId } = req.params;
     const { user_id, role } = req.body;
 
+    console.log('=== REGISTRATION DEBUG ===');
+    console.log('Event ID:', eventId);
+    console.log('User ID:', user_id);
+    console.log('Role:', role);
+
     try {
-      const result = await registerForEventService(eventId, user_id, role)
-      return res.status(201).json(result)
+      // Check if user is already registered for this event
+      const existingRegistration = await pool.query(
+        'SELECT * FROM registrations WHERE event_id = $1 AND user_id = $2',
+        [eventId, user_id]
+      );
+
+      console.log('Existing registrations found:', existingRegistration.rows);
+
+      if (existingRegistration.rows.length > 0) {
+        const existingRole = existingRegistration.rows[0].role;
+        console.log('User already registered with role:', existingRole);
+        return res.status(409).json({
+          error: `Already registered for this event as ${existingRole}. Please unregister first.`,
+          currentRole: existingRole
+        });
+      }
+
+      // Validate role
+      const validRoles = ['Runner', 'Starting Official', 'Finish Line Official', 'Volunteer'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ error: 'Invalid role' });
+      }
+
+      const result = await registerForEventService(eventId, user_id, role);
+      console.log('Registration successful:', result);
+      return res.status(201).json(result);
 
     } catch (error) {
-      console.error("Register error:", error);
+      console.error("Register error details:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
 
-      return res.status(error.status = 400).json({
-      error: error.message = "Already registered for this event"
-    });
-  }
+      return res.status(400).json({
+        error: error.message || "Registration failed"
+      });
+    }
 };
 
 export const unregisterForEvent = async (req, res) => {
