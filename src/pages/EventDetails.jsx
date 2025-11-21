@@ -16,7 +16,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent, API_BASE_URL } from '../services/api';
+import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent, API_BASE_URL, checkUserRegistration } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -53,23 +53,19 @@ const EventDetails = () => {
       setLoading(true);
       setError(null);
       const data = await fetchEventById(id);
-      setEvent(data);     
+      setEvent(data);
+      
+      // Check user's registration status
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
-        const user = JSON.parse(storedUser);
+        const registrationStatus = await checkUserRegistration(id);
+        setIsRegistered(registrationStatus.isRunner);
+        setIsVolunteer(registrationStatus.isVolunteer);
         
-        // Check if registered as Runner
-        if (data.participants) {
-          const userIsRegistered = data.participants.some(p => p.user_id === user.user_id);
-          setIsRegistered(userIsRegistered);
-        }
-        
-        // Check if registered as Volunteer
-        if (data.volunteers) {
-          const userIsVolunteer = data.volunteers.some(v => v.user_id === user.user_id && v.role === 'Volunteer');
-          setIsVolunteer(userIsVolunteer);
-        }
+        console.log('Registration status:', registrationStatus);
       }
+      
+      console.log('Event loaded:', data);
     } catch (err) {
       setError('Failed to load event details.');
       console.error('Error loading event:', err);

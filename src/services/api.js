@@ -250,3 +250,33 @@ export const unregisterFromEvent = async (eventId) => {
         throw error;
     }
 };
+
+export const checkUserRegistration = async (eventId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user) {
+      return { isRunner: false, isVolunteer: false };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/participants`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error('Failed to check registration status');
+    }
+
+    // Check if user is registered and determine their role
+    const userRegistration = data.participants?.find(p => p.user_id === user.user_id);
+
+    return {
+      isRunner: userRegistration?.role === 'Runner',
+      isVolunteer: userRegistration?.role === 'Volunteer',
+      currentRole: userRegistration?.role || null
+    };
+
+  } catch (error) {
+    console.error('Error checking registration:', error);
+    return { isRunner: false, isVolunteer: false, currentRole: null };
+  }
+};
