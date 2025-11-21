@@ -239,6 +239,7 @@ export const deleteEventRepository = async (eventId) => {
 }
 
 export const registerForEventRepository = async (eventId, userId, role) => {
+
   const query = `
     INSERT INTO registrations (event_id, user_id, role)
     VALUES ($1, $2, $3)
