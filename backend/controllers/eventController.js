@@ -45,7 +45,7 @@ export const getEvents = async (req, res) => {
     } catch (err) {
         console.error("Error fetching events:", err);
         res.status(500).json({ error: "Failed to fetch events" });
-            }
+    }
 };
 
 // returns top 3 events by participant count, if less than 3 events exist, will return however many exists < 3.
@@ -72,11 +72,14 @@ export const createEvent = async (req, res) => {
     const eventIdContainer = await getEventIdByName(eventData.name);
     const eventId = eventIdContainer.event_id;
 
-    console.log(`runners=${eventData.runners}; starts=${eventData.startOfficials}, finishs=${eventData.finishOfficials}`);
-
     await createEventRoleService(eventId, "Runner", eventData.max_runners);
     await createEventRoleService(eventId, "Starting Official", eventData.max_start_officials);
     await createEventRoleService(eventId, "Finish Line Official", eventData.max_finish_officials);
+
+    // Add arbitrarily high limit for generic volunteers
+    // 30k is used because 32,767 is the max limit for small signed ints, which
+    // the event_role limit is
+    await createEventRoleService(eventId, "Volunteer", 30000);
 
     if (sponsors || prizes) {
       await pool.query(
