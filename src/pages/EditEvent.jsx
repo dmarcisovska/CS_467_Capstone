@@ -7,8 +7,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import titleImg from '../assets/trail3.jpg';
@@ -20,6 +18,14 @@ import SaveIcon from '@mui/icons-material/Save';
 import Autocomplete from 'react-google-autocomplete';
 import dayjs from 'dayjs';
 import { fetchEventById, updateEvent } from '../services/api';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Divider from '@mui/material/Divider';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import { API_BASE_URL } from '../services/api';
+import Paper from '@mui/material/Paper';
 
 const EditEvent = () => {
   const { id } = useParams();
@@ -45,6 +51,10 @@ const EditEvent = () => {
     prizes: '',
   });
 
+  const [event, setEvent] = useState(null);
+  const [volunteers, setVolunteers] = useState([]);
+  const [assigningRoles, setAssigningRoles] = useState({});
+
   useEffect(() => {
     // Check if user is logged in
     const user = localStorage.getItem('user');
@@ -54,6 +64,7 @@ const EditEvent = () => {
     }
 
     loadEvent();
+    loadVolunteers();
   }, [id, navigate]);
 
   const loadEvent = async () => {
@@ -92,6 +103,21 @@ const EditEvent = () => {
     }
   };
 
+  const loadVolunteers = async () => {
+    try {
+      
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/volunteers`);
+      const data = await response.json();
+      
+      // Filter to only show volunteers (not already assigned officials)
+      const unassignedVolunteers = data.volunteers?.filter(v => v.role === 'Volunteer') || [];
+      
+      setVolunteers(unassignedVolunteers);
+    } catch (err) {
+      console.error('Error loading volunteers:', err);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -118,6 +144,36 @@ const EditEvent = () => {
         latitude: lat,
         longitude: lng,
       });
+    }
+  };
+
+  const handleRoleAssignment = async (userId, newRole) => {
+    setAssigningRoles(prev => ({ ...prev, [userId]: true }));
+    
+    try {
+      // First unregister from current role
+      await fetch(`${API_BASE_URL}/api/events/${id}/register/${userId}`, {
+        method: 'DELETE',
+      });
+      
+      // Then register with new role
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, role: newRole }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to assign role');
+      
+      alert(`Volunteer assigned as ${newRole}`);
+      
+      // Reload volunteers and event data
+      await loadVolunteers();
+      await loadEvent();
+    } catch (err) {
+      alert('Error assigning role: ' + err.message);
+    } finally {
+      setAssigningRoles(prev => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -368,25 +424,81 @@ const EditEvent = () => {
                   />
                 </Grid>
 
-                <Stack direction="row" spacing={2} sx={{ mt: 4, mb: 4 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    endIcon={submitting ? null : <SaveIcon />}
-                    disabled={submitting}
+                {/* Volunteer Assignment Section */}
+                <Box sx={{ mt: 4 }}>
+                  <Typography 
+                    variant="h5" 
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                   >
-                    {submitting ? <CircularProgress size={24} /> : 'Save Changes'}
-                  </Button>
+                    <PeopleAltIcon color="primary" />
+                    Assign Volunteers to Roles
+                  </Typography>
+                  <Divider sx={{ mb: 3 }} />
                   
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    onClick={() => navigate(`/events/${id}`)}
-                  >
-                    Cancel
-                  </Button>
-                </Stack>
+                  {volunteers.length === 0 ? (
+                    <Alert variant="filled" severity="info">
+                      No volunteers have registered for this event yet.
+                    </Alert>
+                  ) : (
+                    <Stack spacing={2}>
+                      {volunteers.map((volunteer) => (
+                        <Paper 
+                          key={volunteer.user_id} 
+                          sx={{ 
+                            p: 2, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            gap: 2,
+                          }}
+                        >
+                          <Box>
+                            <Typography variant="body1" fontWeight={600}>
+                              {volunteer.username}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {volunteer.email}
+                            </Typography>
+                          </Box>
+                          
+                          <FormControl sx={{ minWidth: 200 }}>
+                            <InputLabel>Assign Role</InputLabel>
+                            <Select
+                              value={volunteer.role}
+                              label="Assign Role"
+                              onChange={(e) => handleRoleAssignment(volunteer.user_id, e.target.value)}
+                              disabled={assigningRoles[volunteer.user_id]}
+                            >
+                              <MenuItem value="Volunteer">Volunteer (Unassigned)</MenuItem>
+                              <MenuItem value="Starting Official">Starting Official</MenuItem>
+                              <MenuItem value="Finish Line Official">Finish Line Official</MenuItem>
+                            </Select>
+                            {assigningRoles[volunteer.user_id] && (
+                              <CircularProgress size={20} sx={{ ml: 2 }} />
+                            )}
+                          </FormControl>
+                        </Paper>
+                      ))}
+                    </Stack>
+                  )}
+                  
+                  <Alert variant="filled" severity="info" sx={{ mt: 2 }}>
+                    <strong>Note:</strong> Volunteers must register for the event first. 
+                    Once assigned as an official, they will appear in the "Event Officials & Volunteers" section 
+                    on the event details page.
+                  </Alert>
+                </Box>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={submitting}
+                  sx={{ mt: 4 }}
+                >
+                  {submitting ? <CircularProgress size={24} /> : 'Update Event'}
+                </Button>
               </Box>
             </LocalizationProvider>
           </Stack>
