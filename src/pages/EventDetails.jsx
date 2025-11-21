@@ -637,19 +637,21 @@ const EventDetails = () => {
                   Volunteer Opportunities
                 </Typography>
                 <Stack spacing={1}>
-                  {event.roles.map((role, index) => (
-                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="body2">
-                        {role.role}
-                      </Typography>
-                      <Chip 
-                        label={`${role.current_count || 0}/${role.role_limit} filled`}
-                        size="small"
-                        color={role.current_count >= role.role_limit ? 'error' : 'success'}
-                        variant="outlined"
-                      />
-                    </Box>
-                  ))}
+                  {event.roles
+                    .filter(role => role.role !== 'Volunteer')
+                    .map((role, index) => (
+                      <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2">
+                          {role.role}
+                        </Typography>
+                        <Chip 
+                          label={`${role.current_count || 0}/${role.role_limit} filled`}
+                          size="small"
+                          color={role.current_count >= role.role_limit ? 'error' : 'success'}
+                          variant="outlined"
+                        />
+                      </Box>
+                    ))}
                 </Stack>
               </Box>
             )}
