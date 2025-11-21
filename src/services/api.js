@@ -207,7 +207,7 @@ export const registerForEvent = async (eventId, role = 'Runner') => {
         console.log('Event ID:', eventId);
         console.log('User ID:', user.user_id);
         console.log('Role:', role);
-        console.log('URL:', `${API_BASE_URL}/api/events/${eventId}/register`);
+        console.log('Full URL:', `${API_BASE_URL}/api/events/${eventId}/register`);
 
         const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register`, {
             method: 'POST',
@@ -220,14 +220,25 @@ export const registerForEvent = async (eventId, role = 'Runner') => {
             }),
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
+        console.log('Response received - Status:', response.status);
+        console.log('Response received - Status Text:', response.statusText);
 
-        const data = await response.json();
-        console.log('Response data:', data);
+        // Get the text first to see raw response
+        const text = await response.text();
+        console.log('Raw response body:', text);
+
+        // Try to parse as JSON
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('Failed to parse response as JSON:', e);
+            throw new Error(`Server returned invalid JSON: ${text}`);
+        }
+
+        console.log('Parsed response data:', data);
 
         if (!response.ok) {
-            // Include the actual error message from backend
             throw new Error(data.error || data.message || 'Failed to register for event');
         }
         return data;
