@@ -4,6 +4,7 @@ import {
     deleteEvent,
     getEventById,
     getEvents,
+    updateRoleForEvent,
     getFeaturedEvents,
     updateEvent,
     registerForEvent,

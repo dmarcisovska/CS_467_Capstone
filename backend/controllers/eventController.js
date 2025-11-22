@@ -6,6 +6,7 @@ import {
     getEventByIdService,
     getEventsService,
     getFeaturedEventsService,
+    updateRoleForEventService,
     updateEventService,
     registerForEventService,
     unregisterForEventService,
