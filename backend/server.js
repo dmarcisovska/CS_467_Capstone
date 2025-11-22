@@ -13,13 +13,23 @@ import geocodeRoutes from "./routes/geocodeRoutes.js";
 import profilePictureRoutes from "./routes/profilePictureRoutes.js";
 
 const app = express();
-const PORT = 8080;
+// eslint-disable-next-line
+const PORT = process.env.PORT || 8080;
+const HOST = '0.0.0.0';
 
 // Set base URL depending on runtime environment
 // eslint-disable-next-line
 export const BASE_URL = process.env.BASE_URL;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://crowd-sourced-racing-events.up.railway.app",   // frontend
+    "http://localhost:5173"                                 // localhost
+  ],
+  credentials: true
+}));
+
+
 app.use(express.json());
 
 // Database connection
@@ -58,6 +68,9 @@ app.use("/api/geocode", geocodeRoutes);
 // profile picture routes
 app.use("/api/profile-picture", profilePictureRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server running on ${BASE_URL}`);
+app.listen(PORT, HOST, () => {
+    console.log(`Server running on ${HOST}:${PORT}`);
+    if (BASE_URL) {
+        console.log(`Public URL: ${BASE_URL}`);
+    }
 });
