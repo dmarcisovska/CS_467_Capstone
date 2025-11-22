@@ -16,7 +16,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import titleImg from '../assets/james-lee-_QvszySFByg-unsplash.jpg';
-import { fetchEventById, deleteEvent } from '../services/api';
+import { fetchEventById, deleteEvent, registerForEvent, unregisterFromEvent, API_BASE_URL, checkUserRegistration } from '../services/api';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -25,6 +25,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
+import TimerIcon from '@mui/icons-material/Timer';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -38,6 +39,10 @@ const EventDetails = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [isVolunteer, setIsVolunteer] = useState(false);
+  const [volunteering, setVolunteering] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -49,6 +54,17 @@ const EventDetails = () => {
       setError(null);
       const data = await fetchEventById(id);
       setEvent(data);
+      
+      // Check user's registration status
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const registrationStatus = await checkUserRegistration(id);
+        setIsRegistered(registrationStatus.isRunner);
+        setIsVolunteer(registrationStatus.isVolunteer);
+        
+        console.log('Registration status:', registrationStatus);
+      }
+      
       console.log('Event loaded:', data);
     } catch (err) {
       setError('Failed to load event details.');
@@ -132,6 +148,83 @@ const EventDetails = () => {
     }
   }, [event]);
 
+  const handleRegister = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) { 
+      navigate('/login');
+      return;
+    }
+
+    setRegistering(true);
+    
+    try {
+      if (isRegistered) {
+        // Unregister
+        await unregisterFromEvent(id);
+        setIsRegistered(false);
+      } else {
+        // Register
+        await registerForEvent(id);
+        setIsRegistered(true);
+      }
+      loadEvent();
+    } catch (err) {
+      // If already registered, backend returns 409
+      if (err.message.includes('Already registered')) {
+        setIsRegistered(true);
+      }
+      alert(err.message);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleVolunteer = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) { 
+      navigate('/login');
+      return;
+    }
+    setVolunteering(true);
+    
+    try {
+      if (isVolunteer) {
+        await unregisterFromEvent(id);
+        setIsVolunteer(false);
+        alert('Unregistered as volunteer');
+      } else {
+        // Check if already registered as runner
+        if (isRegistered) {
+          const confirmSwitch = window.confirm(
+            'You are already registered as a Runner. Do you want to switch to Volunteer instead?'
+          );
+          if (!confirmSwitch) {
+            setVolunteering(false);
+            return;
+          }
+          await unregisterFromEvent(id);
+          setIsRegistered(false);
+        }
+        
+        await registerForEvent(id, 'Volunteer');
+        setIsVolunteer(true);
+        alert('Successfully registered as volunteer!');
+      }
+      loadEvent();
+    } catch (err) {
+      console.error('Volunteer registration error:', err);
+      console.error('Error message:', err.message);
+      
+      if (err.message.includes('Already registered')) {
+        alert('You are already registered for this event with a different role. Please unregister first using the other button.');
+      } else {
+        alert('Registration failed: ' + err.message);
+      }
+    } finally {
+      setVolunteering(false);
+    }
+  };
+
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
   };
@@ -150,6 +243,29 @@ const EventDetails = () => {
       alert('Failed to delete event: ' + err.message);
       setDeleting(false);
       setDeleteDialogOpen(false);
+    }
+  };
+
+  const checkRegistrationStatus = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+    
+    const user = JSON.parse(storedUser);
+    
+    try {
+      // Fetch all participants
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/participants`);
+      const data = await response.json();
+      
+      const myRegistration = data.participants?.find(p => p.user_id === user.user_id);
+      
+      if (myRegistration) {
+        alert(`You ARE registered as: ${myRegistration.role}`);
+      } else {
+        alert('You are NOT registered for this event');
+      }
+    } catch (err) {
+      console.error('Check failed:', err);
     }
   };
 
@@ -176,6 +292,13 @@ const EventDetails = () => {
       </Container>
     );
   }
+
+  const participantCount =
+    Array.isArray(event?.roles)
+      ? (event.roles.find(r => r.role === 'Runner')?.current_count ?? 0)
+      : (Array.isArray(event?.participants)
+          ? event.participants.length
+          : (event?.participant_count ?? 0));
 
   return (
     <>
@@ -258,6 +381,26 @@ const EventDetails = () => {
                 This event has already taken place.
               </Alert>
             )}
+      
+        {isRegistered && (
+          <Button
+            variant="contained"
+            color="success"
+            size="large"
+            fullWidth
+            startIcon={<TimerIcon sx={{ color: 'white' }} />}
+            sx={{ 
+              mb: 3,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              color: 'white',
+            }}
+            onClick={() => navigate(`/raceday/${id}`)}
+          >
+            Go to Race Day
+          </Button>
+        )}
 
         <Paper sx={{ p: 4, position: 'relative' }}>
           {/* Show Edit and Delete buttons if user is the creator */}
@@ -291,7 +434,7 @@ const EventDetails = () => {
             )}
             <Chip
               icon={<PeopleIcon />}
-              label={`${event.participant_count || 0} participants`}
+              label={`${participantCount} participants`}
               variant="outlined"
               sx={{ height: '40px', fontSize: '1rem' }}
             />
@@ -494,33 +637,63 @@ const EventDetails = () => {
                   Volunteer Opportunities
                 </Typography>
                 <Stack spacing={1}>
-                  {event.roles.map((role, index) => (
-                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="body2">
-                        {role.role}
-                      </Typography>
-                      <Chip 
-                        label={`${role.current_count || 0}/${role.role_limit} filled`}
-                        size="small"
-                        color={role.current_count >= role.role_limit ? 'error' : 'success'}
-                        variant="outlined"
-                      />
-                    </Box>
-                  ))}
+                  {event.roles
+                    .filter(role => role.role !== 'Volunteer')
+                    .map((role, index) => (
+                      <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2">
+                          {role.role}
+                        </Typography>
+                        <Chip 
+                          label={`${role.current_count || 0}/${role.role_limit} filled`}
+                          size="small"
+                          color={role.current_count >= role.role_limit ? 'error' : 'success'}
+                          variant="outlined"
+                        />
+                      </Box>
+                    ))}
                 </Stack>
               </Box>
             )}
 
             <Box sx={{ pt: 2 }}>
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                sx={{ maxWidth: 400 }}
-                onClick={() => alert('Registered')}
-              >
-                Register 
-              </Button>
+              <Stack spacing={2}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  sx={{ maxWidth: 400 }}
+                  onClick={handleRegister}
+                  disabled={registering}
+                  color={isRegistered ? 'error' : 'primary'}
+                >
+                  {registering ? (
+                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                  ) : isRegistered ? (
+                    'Unregister as Runner'
+                  ) : (
+                    'Register as Runner'
+                  )}
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  size="large"
+                  fullWidth
+                  sx={{ maxWidth: 400 }}
+                  onClick={handleVolunteer}
+                  disabled={volunteering}
+                  color={isVolunteer ? 'error' : 'primary'}
+                >
+                  {volunteering ? (
+                    <CircularProgress size={24} />
+                  ) : isVolunteer ? (
+                    'Unregister as Volunteer'
+                  ) : (
+                    'Register as Volunteer'
+                  )}
+                </Button>
+              </Stack>
             </Box>
           </Stack>
         </Paper>

@@ -1,5 +1,18 @@
 import express from "express";
-import { createEvent, deleteEvent, getEventById, getEvents, getFeaturedEvents, updateEvent, registerForEvent, unregisterForEvent, updateRoleForEvent, getVolunteers, getFinalists, getRunners, getParticipants } from '../controllers/eventController.js';
+import { 
+    createEvent,
+    deleteEvent,
+    getEventById,
+    getEvents,
+    getFeaturedEvents,
+    updateEvent,
+    registerForEvent,
+    unregisterForEvent,
+    getVolunteers,
+    getFinalists,
+    getRunners,
+    getParticipants
+} from '../controllers/eventController.js';
 
 const router = express.Router();
 // Base Url: '/api/events/'

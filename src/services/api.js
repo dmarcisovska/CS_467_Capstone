@@ -193,3 +193,90 @@ export const deleteEvent = async (eventId) => {
     throw error;
   }
 };
+
+// Register a user for an event to /api/events/:eventId/register
+export const registerForEvent = async (eventId, role = 'Runner') => {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!user) {
+            throw new Error('Must be logged in to register for event');
+        }
+        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: user.user_id,
+                role: role,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to register for event');
+        }
+        return data;
+
+    } catch (error) {
+        console.error('Error registering for event:', error);
+        throw error;
+    }
+};
+
+export const unregisterFromEvent = async (eventId) => {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!user) {
+            throw new Error('Must be logged in to unregister from event');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/register/${user.user_id}`, {
+            method: 'DELETE',
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to unregister from event');
+        }
+        return data;
+
+    } catch (error) {
+        console.error('Error unregistering from event:', error);
+        throw error;
+    }
+};
+
+export const checkUserRegistration = async (eventId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user) {
+      return { isRunner: false, isVolunteer: false };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/participants`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error('Failed to check registration status');
+    }
+
+    // Check if user is registered and determine their role
+    const userRegistration = data.participants?.find(p => p.user_id === user.user_id);
+
+    return {
+      isRunner: userRegistration?.role === 'Runner',
+      isVolunteer: userRegistration?.role === 'Volunteer',
+      currentRole: userRegistration?.role || null
+    };
+
+  } catch (error) {
+    console.error('Error checking registration:', error);
+    return { isRunner: false, isVolunteer: false, currentRole: null };
+  }
+};

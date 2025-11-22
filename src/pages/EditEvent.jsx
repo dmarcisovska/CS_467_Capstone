@@ -7,8 +7,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import titleImg from '../assets/trail3.jpg';
@@ -20,6 +18,15 @@ import SaveIcon from '@mui/icons-material/Save';
 import Autocomplete from 'react-google-autocomplete';
 import dayjs from 'dayjs';
 import { fetchEventById, updateEvent } from '../services/api';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Divider from '@mui/material/Divider';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import { API_BASE_URL } from '../services/api';
+import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
 
 const EditEvent = () => {
   const { id } = useParams();
@@ -45,6 +52,12 @@ const EditEvent = () => {
     prizes: '',
   });
 
+  const [event, setEvent] = useState(null);
+  const [volunteers, setVolunteers] = useState([]);
+  const [startingOfficials, setStartingOfficials] = useState([]);
+  const [finishLineOfficials, setFinishLineOfficials] = useState([]);
+  const [assigningRoles, setAssigningRoles] = useState({});
+
   useEffect(() => {
     // Check if user is logged in
     const user = localStorage.getItem('user');
@@ -54,6 +67,7 @@ const EditEvent = () => {
     }
 
     loadEvent();
+    loadVolunteers();
   }, [id, navigate]);
 
   const loadEvent = async () => {
@@ -92,6 +106,30 @@ const EditEvent = () => {
     }
   };
 
+  const loadVolunteers = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/volunteers`);
+      const data = await response.json();
+      
+      console.log('All volunteers data:', data);
+      
+      // Separate volunteers by role
+      const unassigned = data.volunteers?.filter(v => v.role === 'Volunteer') || [];
+      const starting = data.volunteers?.filter(v => v.role === 'Starting Official') || [];
+      const finish = data.volunteers?.filter(v => v.role === 'Finish Line Official') || [];
+      
+      setVolunteers(unassigned);
+      setStartingOfficials(starting);
+      setFinishLineOfficials(finish);
+      
+      console.log('Unassigned volunteers:', unassigned.length);
+      console.log('Starting Officials:', starting.length);
+      console.log('Finish Line Officials:', finish.length);
+    } catch (err) {
+      console.error('Error loading volunteers:', err);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -118,6 +156,36 @@ const EditEvent = () => {
         latitude: lat,
         longitude: lng,
       });
+    }
+  };
+
+  const handleRoleAssignment = async (userId, newRole) => {
+    setAssigningRoles(prev => ({ ...prev, [userId]: true }));
+    
+    try {
+      // First unregister from current role
+      await fetch(`${API_BASE_URL}/api/events/${id}/register/${userId}`, {
+        method: 'DELETE',
+      });
+      
+      // Then register with new role
+      const response = await fetch(`${API_BASE_URL}/api/events/${id}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, role: newRole }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to assign role');
+      
+      alert(`Volunteer assigned as ${newRole}`);
+      
+      // Reload volunteers and event data
+      await loadVolunteers();
+      await loadEvent();
+    } catch (err) {
+      alert('Error assigning role: ' + err.message);
+    } finally {
+      setAssigningRoles(prev => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -368,25 +436,167 @@ const EditEvent = () => {
                   />
                 </Grid>
 
-                <Stack direction="row" spacing={2} sx={{ mt: 4, mb: 4 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    endIcon={submitting ? null : <SaveIcon />}
-                    disabled={submitting}
+                {/* Assigned Officials Section */}
+                <Box sx={{ mt: 4 }}>
+                  <Typography 
+                    variant="h5" 
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                   >
-                    {submitting ? <CircularProgress size={24} /> : 'Save Changes'}
-                  </Button>
+                    <PeopleAltIcon color="primary" />
+                    Event Officials
+                  </Typography>
+                  <Divider sx={{ mb: 3 }} />
                   
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    onClick={() => navigate(`/events/${id}`)}
+                  {/* Starting Officials */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" color="primary" gutterBottom>
+                      Starting Officials ({startingOfficials.length})
+                    </Typography>
+                    {startingOfficials.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+                        No starting officials assigned yet
+                      </Typography>
+                    ) : (
+                      <Stack spacing={1}>
+                        {startingOfficials.map((official) => (
+                          <Paper 
+                            key={official.user_id} 
+                            sx={{ 
+                              p: 2, 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              bgcolor: 'success.lighter',
+                            }}
+                          >
+                            <Box>
+                              <Typography variant="body1" fontWeight={600}>
+                                {official.username}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {official.email}
+                              </Typography>
+                            </Box>
+                            <Chip label="Starting Official" color="success" size="small" />
+                          </Paper>
+                        ))}
+                      </Stack>
+                    )}
+                  </Box>
+
+                  {/* Finish Line Officials */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" color="primary" gutterBottom>
+                      Finish Line Officials ({finishLineOfficials.length})
+                    </Typography>
+                    {finishLineOfficials.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+                        No finish line officials assigned yet
+                      </Typography>
+                    ) : (
+                      <Stack spacing={1}>
+                        {finishLineOfficials.map((official) => (
+                          <Paper 
+                            key={official.user_id} 
+                            sx={{ 
+                              p: 2, 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              bgcolor: 'info.lighter',
+                            }}
+                          >
+                            <Box>
+                              <Typography variant="body1" fontWeight={600}>
+                                {official.username}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {official.email}
+                              </Typography>
+                            </Box>
+                            <Chip label="Finish Line Official" color="info" size="small" />
+                          </Paper>
+                        ))}
+                      </Stack>
+                    )}
+                  </Box>
+                </Box>
+
+                {/* Volunteer Assignment Section */}
+                <Box sx={{ mt: 4 }}>
+                  <Typography 
+                    variant="h5" 
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                   >
-                    Cancel
-                  </Button>
-                </Stack>
+                    <PeopleAltIcon color="primary" />
+                    Assign Volunteers to Roles
+                  </Typography>
+                  <Divider sx={{ mb: 3 }} />
+                  
+                  {volunteers.length === 0 ? (
+                    <Alert variant="filled" severity="info">
+                      No unassigned volunteers. All volunteers have been assigned to official roles.
+                    </Alert>
+                  ) : (
+                    <Stack spacing={2}>
+                      {volunteers.map((volunteer) => (
+                        <Paper 
+                          key={volunteer.user_id} 
+                          sx={{ 
+                            p: 2, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            gap: 2,
+                          }}
+                        >
+                          <Box>
+                            <Typography variant="body1" fontWeight={600}>
+                              {volunteer.username}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {volunteer.email}
+                            </Typography>
+                          </Box>
+                          
+                          <FormControl sx={{ minWidth: 200 }}>
+                            <InputLabel>Assign Role</InputLabel>
+                            <Select
+                              value={volunteer.role}
+                              label="Assign Role"
+                              onChange={(e) => handleRoleAssignment(volunteer.user_id, e.target.value)}
+                              disabled={assigningRoles[volunteer.user_id]}
+                            >
+                              <MenuItem value="Volunteer">Volunteer (Unassigned)</MenuItem>
+                              <MenuItem value="Starting Official">Starting Official</MenuItem>
+                              <MenuItem value="Finish Line Official">Finish Line Official</MenuItem>
+                            </Select>
+                            {assigningRoles[volunteer.user_id] && (
+                              <CircularProgress size={20} sx={{ ml: 2 }} />
+                            )}
+                          </FormControl>
+                        </Paper>
+                      ))}
+                    </Stack>
+                  )}
+                  
+                  <Alert variant="filled" severity="info" sx={{ mt: 2 }}>
+                    <strong>Note:</strong> Volunteers must register for the event first. 
+                    Once assigned as an official, they will appear in the sections above.
+                  </Alert>
+                </Box>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={submitting}
+                  sx={{ mt: 4 }}
+                >
+                  {submitting ? <CircularProgress size={24} /> : 'Update Event'}
+                </Button>
               </Box>
             </LocalizationProvider>
           </Stack>

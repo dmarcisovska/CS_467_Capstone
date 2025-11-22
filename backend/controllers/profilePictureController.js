@@ -23,9 +23,7 @@ export const patchProfilePictureById = async (req, res) => {
     }
 
     // Save file to disk
-    const profilePicture = await patchProfilePictureService(pictureData);
-
-    // Build URL from env or current request host
+    await patchProfilePictureService(pictureData);   
     const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     const avatarUrl = `${baseUrl}/api/profile-picture/${userId}`;
 
@@ -33,7 +31,7 @@ export const patchProfilePictureById = async (req, res) => {
       'UPDATE users SET avatar_url = $1 WHERE user_id = $2',
       [avatarUrl, userId]
     );
-
+    
     // Return avatar_url so frontend can use it
     res.status(200).json({
       success: true,
