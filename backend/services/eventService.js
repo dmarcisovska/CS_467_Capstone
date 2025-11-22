@@ -54,6 +54,29 @@ export const unregisterForEventService = async (eventId, userId) => {
   }
 }
 
+export const updateRoleForEventService = async (eventId, userId, newRole) => {
+  if (newRole === "Starting Official") {
+    const existingVolunteers = await eventRepository.getVolunteerList(eventId);
+
+    if (existingVolunteers) {
+      const existingStartingOfficial = existingVolunteers.find(volunteer => volunteer.role === "Starting Official" && volunteer.user_id !== userId);
+
+      if (existingStartingOfficial) {
+        const error = new Error(`Event already has a Starting Official`);
+        error.status = 409;
+        throw error;
+      }
+    }
+
+  }
+  const updateRole = await eventRepository.updateRoleForEventRepository(eventId, userId, newRole);
+  if (!updateRole) {
+    const error = new Error("Could not update role for event")
+    error.status = 404;
+    throw error;
+  }
+}
+
 export const getEventByIdService = async (eventId) => {
   try {
     const eventObj = await eventRepository.getEventByIdRepository(eventId);

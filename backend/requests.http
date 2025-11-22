@@ -87,7 +87,7 @@ Content-Type: application/json
 }
 
 ### GET a specific event using event_id
-GET http://localhost:8080/api/events/9
+GET http://localhost:8080/api/events/2
 Content-Type: application/json
 
 ### UPDATE an existing event
@@ -193,11 +193,18 @@ Content-Type: application/json
 ### DELETE Unregister for an event
 DELETE http://localhost:8080/api/events/5/register/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 
+### UPDATE role for user in an event
+PATCH http://localhost:8080/api/events/5/update-role/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+Accept: application/json
+Content-Type: application/json
 
-
+{
+  "user_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+  "newRole": "Runner"
+}
 
 ### GET single event
-GET http://localhost:8080/api/events/5
+GET http://localhost:8080/api/events/3
 Accept: application/json
 
 ### GET Event finished Finalists
@@ -206,7 +213,7 @@ Accept: application/json
 
 
 ### GET Event Volunteers
-http://localhost:8080/api/events/6/volunteers
+http://localhost:8080/api/events/5/volunteers
 Accept: application/json
 
 
@@ -216,5 +223,5 @@ Accept: application/json
 
 
 ### GET Event Partcipants (all runners / volunteers)
-http://localhost:8080/api/events/2/participants
+http://localhost:8080/api/events/5/participants
 Accept: application/json
