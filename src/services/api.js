@@ -256,7 +256,13 @@ export const checkUserRegistration = async (eventId) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
     if (!user) {
-      return { isRunner: false, isVolunteer: false };
+      return { 
+        isRunner: false, 
+        isVolunteer: false, 
+        isStartingOfficial: false,
+        isFinishLineOfficial: false,
+        currentRole: null 
+      };
     }
 
     const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/participants`);
@@ -272,11 +278,19 @@ export const checkUserRegistration = async (eventId) => {
     return {
       isRunner: userRegistration?.role === 'Runner',
       isVolunteer: userRegistration?.role === 'Volunteer',
+      isStartingOfficial: userRegistration?.role === 'Starting Official',
+      isFinishLineOfficial: userRegistration?.role === 'Finish Line Official',
       currentRole: userRegistration?.role || null
     };
 
   } catch (error) {
     console.error('Error checking registration:', error);
-    return { isRunner: false, isVolunteer: false, currentRole: null };
+    return { 
+      isRunner: false, 
+      isVolunteer: false, 
+      isStartingOfficial: false,
+      isFinishLineOfficial: false,
+      currentRole: null 
+    };
   }
 };
