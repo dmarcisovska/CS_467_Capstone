@@ -173,7 +173,7 @@ const EventDetails = () => {
       if (err.message.includes('Already registered')) {
         setIsRegistered(true);
       }
-      alert(err.message);
+      console.log(err.message);
     } finally {
       setRegistering(false);
     }
@@ -191,7 +191,7 @@ const EventDetails = () => {
       if (isVolunteer) {
         await unregisterFromEvent(id);
         setIsVolunteer(false);
-        alert('Unregistered as volunteer');
+        // alert('Unregistered as volunteer');
       } else {
         // Check if already registered as runner
         if (isRegistered) {
@@ -208,7 +208,7 @@ const EventDetails = () => {
         
         await registerForEvent(id, 'Volunteer');
         setIsVolunteer(true);
-        alert('Successfully registered as volunteer!');
+        // alert('Successfully registered as volunteer!');
       }
       loadEvent();
     } catch (err) {
@@ -216,9 +216,9 @@ const EventDetails = () => {
       console.error('Error message:', err.message);
       
       if (err.message.includes('Already registered')) {
-        alert('You are already registered for this event with a different role. Please unregister first using the other button.');
+        // alert('You are already registered for this event with a different role. Please unregister first using the other button.');
       } else {
-        alert('Registration failed: ' + err.message);
+        // alert('Registration failed: ' + err.message);
       }
     } finally {
       setVolunteering(false);
@@ -237,10 +237,10 @@ const EventDetails = () => {
     setDeleting(true);
     try {
       await deleteEvent(id);
-      alert('Event deleted successfully');
+      // alert('Event deleted successfully');
       navigate('/events');
     } catch (err) {
-      alert('Failed to delete event: ' + err.message);
+      // alert('Failed to delete event: ' + err.message);
       setDeleting(false);
       setDeleteDialogOpen(false);
     }
@@ -260,9 +260,9 @@ const EventDetails = () => {
       const myRegistration = data.participants?.find(p => p.user_id === user.user_id);
       
       if (myRegistration) {
-        alert(`You ARE registered as: ${myRegistration.role}`);
+        // alert(`You ARE registered as: ${myRegistration.role}`);
       } else {
-        alert('You are NOT registered for this event');
+        // alert('You are NOT registered for this event');
       }
     } catch (err) {
       console.error('Check failed:', err);

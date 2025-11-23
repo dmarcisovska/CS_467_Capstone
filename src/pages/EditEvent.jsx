@@ -177,13 +177,13 @@ const EditEvent = () => {
       
       if (!response.ok) throw new Error('Failed to assign role');
       
-      alert(`Volunteer assigned as ${newRole}`);
+      // alert(`Volunteer assigned as ${newRole}`);
       
       // Reload volunteers and event data
       await loadVolunteers();
       await loadEvent();
     } catch (err) {
-      alert('Error assigning role: ' + err.message);
+      console.log('Error assigning role: ' + err.message);
     } finally {
       setAssigningRoles(prev => ({ ...prev, [userId]: false }));
     }
