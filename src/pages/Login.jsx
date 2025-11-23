@@ -36,7 +36,7 @@ const Login = () => {
         email: formData.email,
         password: formData.password,
       });
-
+      localStorage.setItem("token", response.token);
       console.log('Found user with matching password:', response);
       
       // Store user data in localStorage

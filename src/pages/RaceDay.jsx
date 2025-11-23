@@ -23,6 +23,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import { API_BASE_URL } from "../services/api";
 
 const RaceDay = () => {
   const { id } = useParams();
@@ -33,7 +34,10 @@ const RaceDay = () => {
   const [userRole, setUserRole] = useState(null);
   const [raceStarted, setRaceStarted] = useState(false);
   const [elapsedTime, setElapsedTime] = useState('00:00:00');
-
+  
+  const [finalists, setFinalists] = useState([]);
+  const [runnerCount, setRunnerCount] = useState(0);
+  const [qrSvg, setQrSvg] = useState(null);
   // Mock data - replace with actual API calls
   const mockFinalists = [
     { username: 'Alice Runner', elapsed_time: '01:23:45', user_id: '1' },
@@ -46,40 +50,116 @@ const RaceDay = () => {
     loadRaceDay();
   }, [id]);
 
-  const loadRaceDay = async () => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      if (!storedUser) {
-        navigate('/login');
-        return;
-      }
 
-      // TODO: Fetch event details from API
-      // const eventData = await fetchEventById(id);
-      const mockEvent = {
-        event_id: id,
-        name: 'Sample Marathon 2024',
-        event_datetime: new Date().toISOString(),
-      };
-      setEvent(mockEvent);
 
-      // TODO: Determine user's role from backend
-      // For now, set a mock role - change to 'Runner', 'Starting Official', 'Finish Line Official', or null
-      setUserRole('Runner'); // Change this to test different views
+const loadRaceDay = async () => {
+  try {
+    setLoading(true);
 
-      setLoading(false);
-    } catch (err) {
-      console.error('Race day load error:', err);
-      setLoading(false);
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token") || localStorage.getItem("firebase_id_token");
+
+    if (!storedUser || !token) {
+      navigate("/login");
+      return;
     }
-  };
 
-  const handleStartRace = async () => {
-    // TODO: Call backend API to start race
-    // await fetch(`/api/raceday/set-start-time?event=${id}`, { method: 'PATCH' });
-    alert('Race started! (Backend integration pending)');
+    // 1. Get event details (use API_BASE_URL like EventDetails)
+    const eventRes = await fetch(`${API_BASE_URL}/api/events/${id}`);
+    const eventData = await eventRes.json();
+
+    setRaceStarted(!!eventData.start_time);
+
+    if (!eventRes.ok || !eventData) {
+      console.error("Event fetch failed:", eventData);
+      setEvent(null);
+      setLoading(false);
+      return;
+    }
+
+    setEvent(eventData);
+
+    // 2. Determine user role from event data
+    let role = null;
+
+    if (eventData.volunteers) {
+      const volunteer = eventData.volunteers.find(
+        v => v.user_id === storedUser.user_id
+      );
+      if (volunteer) role = volunteer.role;
+    }
+
+    if (!role && eventData.participants) {
+      const participant = eventData.participants.find(
+        p => p.user_id === storedUser.user_id
+      );
+      if (participant) role = "Runner";
+    }
+
+    setUserRole(role);
+    if (role === "Runner") {
+    const qrRes = await fetch(`${API_BASE_URL}/api/raceday/make-qr?event=${id}&user=${storedUser.user_id}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+  if (qrRes.ok) {
+    const svg = await qrRes.text();
+    setQrSvg(svg);
+  }
+}
+
+
+    // 3. Get leaderboard
+    const lbRes = await fetch(`${API_BASE_URL}/api/events/${id}/finalists`);
+    const lbData = await lbRes.json();
+
+    if (lbRes.ok && lbData.runners) {
+      setFinalists(lbData.runners);
+      setRunnerCount(lbData.count);
+    } else {
+      setFinalists([]);
+      setRunnerCount(0);
+    }
+
+    setLoading(false);
+
+  } catch (err) {
+    console.error("RaceDay load error:", err);
+    setLoading(false);
+  }
+};
+
+
+
+const handleStartRace = async () => {
+  try {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("firebase_id_token");
+
+    const res = await fetch(`${API_BASE_URL}/api/raceday/set-start-time?event=${id}`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Start race failed:", err);
+      alert("Failed to start race: " + err);
+      return;
+    }
+
+    alert("Race started!");
     setRaceStarted(true);
-  };
+
+  } catch (err) {
+    console.error(err);
+    alert("Error starting race");
+  }
+};
 
   const handleOpenScanner = () => {
     // TODO: Open QR code scanner
@@ -87,9 +167,22 @@ const RaceDay = () => {
   };
 
   const formatElapsedTime = (elapsed) => {
-    if (!elapsed) return 'N/A';
-    return elapsed;
-  };
+  if (!elapsed) return "N/A";
+
+  // backend object format: { minutes: 12, seconds: 30 }
+  if (typeof elapsed === "object") {
+    const mins = elapsed.minutes ?? 0;
+    const secs = elapsed.seconds ?? 0;
+
+    const paddedM = String(mins).padStart(2, "0");
+    const paddedS = String(secs).padStart(2, "0");
+
+    return `${paddedM}:${paddedS}`;
+  }
+
+  // fallback if backend later sends a string
+  return elapsed;
+};
 
   if (loading) {
     return (
@@ -257,7 +350,14 @@ const RaceDay = () => {
                   borderColor: 'grey.300',
                 }}
               >
-                <QrCode2Icon sx={{ fontSize: 200, color: 'grey.400' }} />
+                {qrSvg ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: qrSvg }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                ) : (
+                  <QrCode2Icon sx={{ fontSize: 200, color: 'grey.400' }} />
+                )}
               </Box>
             </Box>
 
@@ -284,81 +384,80 @@ const RaceDay = () => {
           </Typography>
           <Divider sx={{ my: 2 }} />
 
-          {mockFinalists.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <TimerIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
-              <Typography color="text.secondary">
-                No finishers yet. The leaderboard will update as runners
-                complete the race.
+          {finalists.length === 0 ? (
+  <Box sx={{ textAlign: 'center', py: 4 }}>
+    <TimerIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+    <Typography color="text.secondary">
+      No finishers yet. The leaderboard will update as runners complete the race.
+    </Typography>
+  </Box>
+) : (
+  <List>
+    {finalists.map((runner, index) => (
+      <ListItem
+        key={runner.user_id}
+        sx={{
+          border: '1px solid',
+          borderColor: 'grey.300',
+          borderRadius: 1,
+          mb: 1,
+          bgcolor:
+            index < 3
+              ? `rgba(25, 118, 210, ${0.05 * (4 - index)})`
+              : 'transparent',
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          sx={{ width: '100%' }}
+        >
+          <Chip
+            label={`#${index + 1}`}
+            color={
+              index === 0
+                ? 'primary'
+                : index === 1
+                ? 'secondary'
+                : 'default'
+            }
+            sx={{
+              minWidth: 60,
+              fontWeight: 'bold',
+              fontSize: '1rem',
+            }}
+          />
+          <ListItemText
+            primary={
+              <Typography variant="h6" component="span">
+                {runner.username}
               </Typography>
-            </Box>
-          ) : (
-            <List>
-              {mockFinalists.map((runner, index) => (
-                <ListItem
-                  key={runner.user_id}
-                  sx={{
-                    border: '1px solid',
-                    borderColor: 'grey.300',
-                    borderRadius: 1,
-                    mb: 1,
-                    bgcolor:
-                      index < 3
-                        ? `rgba(25, 118, 210, ${0.05 * (4 - index)})`
-                        : 'transparent',
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    sx={{ width: '100%' }}
-                  >
-                    <Chip
-                      label={`#${index + 1}`}
-                      color={
-                        index === 0
-                          ? 'primary'
-                          : index === 1
-                          ? 'secondary'
-                          : 'default'
-                      }
-                      sx={{
-                        minWidth: 60,
-                        fontWeight: 'bold',
-                        fontSize: '1rem',
-                      }}
-                    />
-                    <ListItemText
-                      primary={
-                        <Typography variant="h6" component="span">
-                          {runner.username}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="body2" color="text.secondary">
-                          Time: {formatElapsedTime(runner.elapsed_time)}
-                        </Typography>
-                      }
-                    />
-                    {index < 3 && (
-                      <EmojiEventsIcon
-                        sx={{
-                          color:
-                            index === 0
-                              ? 'gold'
-                              : index === 1
-                              ? 'silver'
-                              : '#CD7F32',
-                          fontSize: 32,
-                        }}
-                      />
-                    )}
-                  </Stack>
-                </ListItem>
-              ))}
-            </List>
+            }
+            secondary={
+              <Typography variant="body2" color="text.secondary">
+                Time: {formatElapsedTime(runner.elapsed_time)}
+              </Typography>
+            }
+          />
+          {index < 3 && (
+            <EmojiEventsIcon
+              sx={{
+                color:
+                  index === 0
+                    ? 'gold'
+                    : index === 1
+                    ? 'silver'
+                    : '#CD7F32',
+                fontSize: 32,
+              }}
+            />
           )}
+        </Stack>
+      </ListItem>
+    ))}
+  </List>
+)}
 
           <Alert variant="filled" severity="info" iconMapping={{
     info: <DirectionsRunIcon fontSize="inherit" />,
@@ -383,31 +482,44 @@ const RaceDay = () => {
                 }}
               >
                 <Typography variant="body1">Total Runners:</Typography>
-                <Chip label="150" color="primary" />
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <Typography variant="body1">Finished:</Typography>
-                <Chip label={mockFinalists.length} color="success" />
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <Typography variant="body1">In Progress:</Typography>
-                <Chip label={150 - mockFinalists.length} color="warning" />
-              </Box>
-            </Stack>
-          </Paper>
-        )}
+        <Chip
+          label={event.participants ? event.participants.length : 0}
+          color="primary"
+        />
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="body1">Finished:</Typography>
+        <Chip
+          label={finalists.length}
+          color="success"
+        />
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="body1">In Progress:</Typography>
+        <Chip
+          label={
+            event.participants
+              ? event.participants.length - finalists.length
+              : 0
+          }
+          color="warning"
+        />
+      </Box>
+    </Stack>
+  </Paper>
+)}
       </Stack>
     </Container>
   );

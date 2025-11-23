@@ -23,6 +23,7 @@ const router = express.Router();
 //          /api/events/?sortBy=date  - > gets all events sorted by date
 router.get("/", getEvents)
 router.get("/featuredevents", getFeaturedEvents)
+
 router.post("/:eventId/register", registerForEvent)
 router.delete("/:eventId/register/:userId", unregisterForEvent)
 

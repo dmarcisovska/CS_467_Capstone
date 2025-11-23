@@ -43,36 +43,63 @@ const EventDetails = () => {
   const [registering, setRegistering] = useState(false);
   const [isVolunteer, setIsVolunteer] = useState(false);
   const [volunteering, setVolunteering] = useState(false);
+  const [qrSvg, setQrSvg] = useState(null);
 
   useEffect(() => {
     loadEvent();
   }, [id]);
 
-  const loadEvent = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchEventById(id);
-      setEvent(data);
-      
-      // Check user's registration status
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const registrationStatus = await checkUserRegistration(id);
-        setIsRegistered(registrationStatus.isRunner);
-        setIsVolunteer(registrationStatus.isVolunteer);
-        
-        console.log('Registration status:', registrationStatus);
+const loadEvent = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const data = await fetchEventById(id);
+    setEvent(data);
+
+    const storedUser = localStorage.getItem('user');
+
+    if (storedUser) {
+
+      const registrationStatus = await checkUserRegistration(id);
+      setIsRegistered(registrationStatus.isRunner);
+      setIsVolunteer(registrationStatus.isVolunteer);
+
+      console.log('Registration status:', registrationStatus);
+
+      if (registrationStatus.isRunner) {
+        const token =
+          localStorage.getItem("token") ||
+          localStorage.getItem("firebase_id_token");
+
+        const storedUserObj = JSON.parse(storedUser);
+
+        const qrRes = await fetch(
+          `${API_BASE_URL}/api/raceday/make-qr?event=${id}&user=${storedUserObj.user_id}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          }
+        );
+
+        if (qrRes.ok) {
+          const svg = await qrRes.text();
+          setQrSvg(svg);
+        } else {
+          console.error("QR fetch failed");
+        }
       }
-      
-      console.log('Event loaded:', data);
-    } catch (err) {
-      setError('Failed to load event details.');
-      console.error('Error loading event:', err);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    console.log('Event loaded:', data);
+
+  } catch (err) {
+    setError('Failed to load event details.');
+    console.error('Error loading event:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (event?.latitude && event?.longitude) {
@@ -654,6 +681,28 @@ const EventDetails = () => {
                     ))}
                 </Stack>
               </Box>
+            )}
+
+            {isRegistered && qrSvg && (
+              <Paper sx={{ p: 3, textAlign: 'center', mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Your Race QR Code
+                </Typography>
+
+                <Box
+                  sx={{
+                    bgcolor: 'grey.100',
+                    p: 3,
+                    borderRadius: 2,
+                    display: 'inline-block'
+                  }}
+                  dangerouslySetInnerHTML={{ __html: qrSvg }}
+                />
+
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  Show this code at the finish line to record your time.
+                </Typography>
+              </Paper>
             )}
 
             <Box sx={{ pt: 2 }}>
