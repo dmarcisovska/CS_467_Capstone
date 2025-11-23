@@ -81,13 +81,7 @@ const Profile = () => {
         throw new Error('Failed to upload avatar');
       }
 
-      const data = await response.json();
-
-      // Use the avatar_url returned by backend
-      const updatedUser = {
-        ...user,
-        avatar_url: data.avatar_url || `${API_BASE_URL}/api/profile-picture/${user.user_id}`,
-      };
+      const updatedUser = { ...user };
 
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
@@ -118,6 +112,8 @@ const Profile = () => {
       </Box>
     );
   }
+
+  const avatarSrc = `${API_BASE_URL}/api/profile-picture/${user.user_id}?t=${avatarKey}`;
 
   return (
     <>
@@ -158,21 +154,23 @@ const Profile = () => {
       <Container sx={{ py: 4 }}>
         <Paper sx={{ p: 4, position: 'relative' }}>
           <Stack spacing={4}>
+            
+            {/* Avatar */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <Box sx={{ position: 'relative' }}>
                 <Avatar
-                  src={user.avatar_url ? `${user.avatar_url}?t=${avatarKey}` : undefined}
+                  src={avatarSrc}
                   sx={{
                     width: 100,
                     height: 100,
-                    bgcolor: user.avatar_url ? 'transparent' : 'primary.main',
+                    bgcolor: 'transparent',
                     fontSize: '2.5rem',
                     fontWeight: 'bold',
                   }}
                 >
-                  {!user.avatar_url && user.username?.[0]?.toLowerCase()}
+                  {user.username?.[0]?.toLowerCase()}
                 </Avatar>
-                
+
                 <Button
                   component="label"
                   variant="contained"
@@ -211,11 +209,12 @@ const Profile = () => {
               </Box>
             </Box>
 
+            {/* Profile Info */}
             <Box>
               <Typography variant="h5" gutterBottom>
                 Profile Info
               </Typography>
-              
+
               <Stack spacing={2} sx={{ mt: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <PersonIcon color="primary" />
@@ -264,12 +263,9 @@ const Profile = () => {
               </Stack>
             </Box>
 
+            {/* Logout */}
             <Box sx={{ pt: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<LogoutIcon />}
-                onClick={handleLogout}
-              >
+              <Button variant="outlined" startIcon={<LogoutIcon />} onClick={handleLogout}>
                 Logout
               </Button>
             </Box>

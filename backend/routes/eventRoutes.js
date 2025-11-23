@@ -4,6 +4,7 @@ import {
     deleteEvent,
     getEventById,
     getEvents,
+    updateRoleForEvent,
     getFeaturedEvents,
     updateEvent,
     registerForEvent,
@@ -25,6 +26,9 @@ router.get("/featuredevents", getFeaturedEvents)
 
 router.post("/:eventId/register", registerForEvent)
 router.delete("/:eventId/register/:userId", unregisterForEvent)
+
+router.patch("/:eventId/update-role/:userId", updateRoleForEvent)
+
 router.get("/:eventId/volunteers", getVolunteers)
 router.get("/:eventId/finalists", getFinalists)
 router.get("/:eventId/runners", getRunners)

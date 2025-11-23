@@ -239,6 +239,7 @@ export const deleteEventRepository = async (eventId) => {
 }
 
 export const registerForEventRepository = async (eventId, userId, role) => {
+
   const query = `
     INSERT INTO registrations (event_id, user_id, role)
     VALUES ($1, $2, $3)
@@ -266,6 +267,17 @@ export const unregisterForEventRepository = async (eventId, userId) => {
   RETURNING *`;
   
   const { rows } = await pool.query(query, [eventId, userId]);
+  return rows[0];
+}
+
+export const updateRoleForEventRepository = async (eventId, userId, newRole) => {
+  const query = `
+  UPDATE registrations
+  SET role = $3
+  WHERE event_id = $1 AND user_id = $2
+  RETURNING *`;
+  
+  const { rows } = await pool.query(query, [eventId, userId, newRole]);
   return rows[0];
 }
 

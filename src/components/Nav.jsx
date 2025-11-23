@@ -1,4 +1,3 @@
-// src/components/ResponsiveAppBar.jsx
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -12,9 +11,9 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../services/api';
 
 const settings = ['Profile', 'Logout'];
 
@@ -39,7 +38,8 @@ function ResponsiveAppBar() {
     const checkUser = () => {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
         setIsLoggedIn(true);
         setAvatarKey(Date.now()); // refresh avatar src when user changes
       } else {
@@ -77,7 +77,7 @@ function ResponsiveAppBar() {
 
   const handleMenuAction = (setting) => {
     handleCloseUserMenu();
-    
+
     if (setting === 'Logout') {
       localStorage.removeItem('user');
       setIsLoggedIn(false);
@@ -86,7 +86,6 @@ function ResponsiveAppBar() {
     } else if (setting === 'Profile') {
       navigate('/profile');
     }
-    // Add other menu actions as needed
   };
 
   // helper to style active links
@@ -95,6 +94,10 @@ function ResponsiveAppBar() {
     color: 'inherit',
     fontWeight: isActive ? 700 : 500,
   });
+
+  const avatarSrc = user
+    ? `${API_BASE_URL}/api/profile-picture/${user.user_id}?t=${avatarKey}`
+    : '';
 
   return (
     <AppBar position="static" color="default">
@@ -217,14 +220,12 @@ function ResponsiveAppBar() {
               <>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar 
+                    <Avatar
                       alt={user?.username}
-                      src={user?.avatar_url ? `${user.avatar_url}?t=${avatarKey}` : undefined}
-                      sx={{
-                        bgcolor: user?.avatar_url ? 'transparent' : 'primary.main',
-                      }}
+                      src={avatarSrc}
+                      sx={{ bgcolor: 'transparent' }}
                     >
-                      {!user?.avatar_url && user?.username?.[0]?.toLowerCase()}
+                      {user?.username?.[0]?.toLowerCase()}
                     </Avatar>
                   </IconButton>
                 </Tooltip>
@@ -239,8 +240,8 @@ function ResponsiveAppBar() {
                   onClose={handleCloseUserMenu}
                 >
                   {settings.map((setting) => (
-                    <MenuItem 
-                      key={setting} 
+                    <MenuItem
+                      key={setting}
                       onClick={() => handleMenuAction(setting)}
                     >
                       <Typography sx={{ textAlign: 'center' }}>

@@ -6,6 +6,7 @@ import {
     getEventByIdService,
     getEventsService,
     getFeaturedEventsService,
+    updateRoleForEventService,
     updateEventService,
     registerForEventService,
     unregisterForEventService,
@@ -45,7 +46,7 @@ export const getEvents = async (req, res) => {
     } catch (err) {
         console.error("Error fetching events:", err);
         res.status(500).json({ error: "Failed to fetch events" });
-            }
+    }
 };
 
 // returns top 3 events by participant count, if less than 3 events exist, will return however many exists < 3.
@@ -72,11 +73,14 @@ export const createEvent = async (req, res) => {
     const eventIdContainer = await getEventIdByName(eventData.name);
     const eventId = eventIdContainer.event_id;
 
-    console.log(`runners=${eventData.runners}; starts=${eventData.startOfficials}, finishs=${eventData.finishOfficials}`);
-
     await createEventRoleService(eventId, "Runner", eventData.max_runners);
     await createEventRoleService(eventId, "Starting Official", eventData.max_start_officials);
     await createEventRoleService(eventId, "Finish Line Official", eventData.max_finish_officials);
+
+    // Add arbitrarily high limit for generic volunteers
+    // 30k is used because 32,767 is the max limit for small signed ints, which
+    // the event_role limit is
+    await createEventRoleService(eventId, "Volunteer", 30000);
 
     if (sponsors || prizes) {
       await pool.query(
@@ -183,6 +187,21 @@ export const unregisterForEvent = async (req, res) => {
     // eslint-disable-next-line no-unused-vars
     } catch (error) {
     res.status(400).json({ error: "failed to unregister from event"})
+    }
+  
+};
+
+export const updateRoleForEvent = async (req, res) => {
+  const { eventId, userId } = req.params;
+  const { newRole } = req.body;
+
+  try {
+      await updateRoleForEventService(eventId, userId, newRole);
+      res.status(200).json({ message: "Successfully chnaged role"});
+
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+    res.status(400).json({ error: "Failed to change role for event"})
     }
   
 };
