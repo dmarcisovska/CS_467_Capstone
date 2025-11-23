@@ -163,17 +163,40 @@ export const registerForEvent = async (req, res) => {
     const { eventId } = req.params;
     const { user_id, role } = req.body;
 
+    console.log('=== BACKEND REGISTRATION DEBUG ===');
+    console.log('Event ID:', eventId);
+    console.log('User ID:', user_id);
+    console.log('Role:', role);
+
     try {
-      const result = await registerForEventService(eventId, user_id, role)
-      return res.status(201).json(result)
+      // Check what's actually in the database FIRST
+      const existingCheck = await pool.query(
+        'SELECT * FROM registrations WHERE event_id = $1 AND user_id = $2',
+        [eventId, user_id]
+      );
+      
+      console.log('Database check - existing registrations:', existingCheck.rows);
+      
+      if (existingCheck.rows.length > 0) {
+        const existingRole = existingCheck.rows[0].role;
+        console.log('❌ User already registered with role:', existingRole);
+        return res.status(400).json({
+          error: `Already registered for this event as ${existingRole}. Please unregister first.`
+        });
+      }
+      
+      console.log('✅ No existing registration found, proceeding...');
+
+      const result = await registerForEventService(eventId, user_id, role);
+      console.log('Registration successful:', result);
+      return res.status(201).json(result);
 
     } catch (error) {
-      console.error("Register error:", error);
-
-      return res.status(error.status = 400).json({
-      error: error.message = "Already registered for this event"
-    });
-  }
+      console.error("Register error details:", error);
+      return res.status(400).json({
+        error: error.message || "Registration failed"
+      });
+    }
 };
 
 export const unregisterForEvent = async (req, res) => {
@@ -252,13 +275,21 @@ export const getRunners = async (req, res) => {
 
 export const getParticipants = async (req, res) => {
   const { eventId } = req.params;
+  
+  console.log('=== GET PARTICIPANTS DEBUG ===');
+  console.log('Event ID:', eventId);
+  
   try {
-    const participants = await getParticipantsService(eventId)
-    const count = participants.length
-    res.status(200).json({participants, count})
-  } catch {
-    console.error("Error in controller when retrieving all participants for this event")
-    res.status(400).json({error: "failed to retrieve all participants"})
+    const participants = await getParticipantsService(eventId);
+    const count = participants.length;
+    
+    console.log('Participants found:', count);
+    console.log('Participants data:', participants);
+    
+    res.status(200).json({participants, count});
+  } catch (error) {
+    console.error("Error in controller when retrieving all participants for this event", error);
+    res.status(400).json({error: "failed to retrieve all participants"});
   }
-}
+};
 

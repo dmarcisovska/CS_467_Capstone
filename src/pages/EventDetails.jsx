@@ -43,6 +43,7 @@ const EventDetails = () => {
   const [registering, setRegistering] = useState(false);
   const [isVolunteer, setIsVolunteer] = useState(false);
   const [volunteering, setVolunteering] = useState(false);
+  const [currentRole, setCurrentRole] = useState(null);
 
   useEffect(() => {
     loadEvent();
@@ -55,17 +56,41 @@ const EventDetails = () => {
       const data = await fetchEventById(id);
       setEvent(data);
       
+      console.log('=== LOAD EVENT DEBUG ===');
+      console.log('Event data:', data);
+      
       // Check user's registration status
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
+        const user = JSON.parse(storedUser);
+        console.log('Current user:', user);
+        
         const registrationStatus = await checkUserRegistration(id);
+        console.log('Registration status from API:', registrationStatus);
+        
         setIsRegistered(registrationStatus.isRunner);
         setIsVolunteer(registrationStatus.isVolunteer);
+        setCurrentRole(registrationStatus.currentRole);
         
-        console.log('Registration status:', registrationStatus);
+        console.log('State after setting:');
+        console.log('- isRegistered:', registrationStatus.isRunner);
+        console.log('- isVolunteer:', registrationStatus.isVolunteer);
+        console.log('- currentRole:', registrationStatus.currentRole);
+        
+        // Check if user appears in volunteers list
+        if (data.volunteers) {
+          const userInVolunteers = data.volunteers.find(v => v.user_id === user.user_id);
+          console.log('User in volunteers list:', userInVolunteers);
+        }
+        
+        // Check if user appears in participants list
+        if (data.participants) {
+          const userInParticipants = data.participants.find(p => p.user_id === user.user_id);
+          console.log('User in participants list:', userInParticipants);
+        }
       }
       
-      console.log('Event loaded:', data);
+      console.log('=== END LOAD EVENT DEBUG ===');
     } catch (err) {
       setError('Failed to load event details.');
       console.error('Error loading event:', err);
@@ -185,43 +210,73 @@ const EventDetails = () => {
       navigate('/login');
       return;
     }
+    
+    console.log('=== VOLUNTEER BUTTON CLICKED ===');
+    console.log('Current state:');
+    console.log('- isVolunteer:', isVolunteer);
+    console.log('- isRegistered:', isRegistered);
+    console.log('- currentRole:', currentRole);
+    
     setVolunteering(true);
     
     try {
       if (isVolunteer) {
+        console.log('Unregistering as volunteer...');
         await unregisterFromEvent(id);
+        
+        // Update state IMMEDIATELY
         setIsVolunteer(false);
-        alert('Unregistered as volunteer');
+        setCurrentRole(null);
+        console.log('State updated after unregister');
       } else {
-        // Check if already registered as runner
-        if (isRegistered) {
+        // Check if already registered in ANY role (using currentRole from state)
+        console.log('Checking currentRole:', currentRole);
+        
+        if (currentRole && currentRole !== 'Volunteer') {
+          console.log(`Already registered as ${currentRole}, showing confirmation...`);
           const confirmSwitch = window.confirm(
-            'You are already registered as a Runner. Do you want to switch to Volunteer instead?'
+            `You are already registered as ${currentRole}. Do you want to switch to Volunteer instead?`
           );
           if (!confirmSwitch) {
+            console.log('User cancelled role switch');
             setVolunteering(false);
             return;
           }
+          console.log('User confirmed role switch, unregistering...');
           await unregisterFromEvent(id);
           setIsRegistered(false);
+          setCurrentRole(null);
         }
         
+        console.log('Registering as Volunteer...');
         await registerForEvent(id, 'Volunteer');
+        
+        // Update state IMMEDIATELY after successful registration
         setIsVolunteer(true);
-        alert('Successfully registered as volunteer!');
+        setCurrentRole('Volunteer');
+        console.log('State updated after registration - isVolunteer: true, currentRole: Volunteer');
       }
-      loadEvent();
+      
+      // Only reload event data (participant counts), don't check registration again
+      console.log('Reloading event data...');
+      const data = await fetchEventById(id);
+      setEvent(data);
+      console.log('Event data reloaded');
+      
     } catch (err) {
-      console.error('Volunteer registration error:', err);
+      console.error('❌ Volunteer registration error:', err);
       console.error('Error message:', err.message);
       
-      if (err.message.includes('Already registered')) {
-        alert('You are already registered for this event with a different role. Please unregister first using the other button.');
-      } else {
-        alert('Registration failed: ' + err.message);
-      }
+      // On error, check actual status from server
+      console.log('Error occurred, checking actual registration status from server...');
+      const registrationStatus = await checkUserRegistration(id);
+      console.log('Actual status from server:', registrationStatus);
+      setIsVolunteer(registrationStatus.isVolunteer);
+      setIsRegistered(registrationStatus.isRunner);
+      setCurrentRole(registrationStatus.currentRole);
     } finally {
       setVolunteering(false);
+      console.log('=== VOLUNTEER BUTTON ACTION COMPLETE ===');
     }
   };
 
@@ -664,13 +719,15 @@ const EventDetails = () => {
                   fullWidth
                   sx={{ maxWidth: 400 }}
                   onClick={handleRegister}
-                  disabled={registering}
+                  disabled={registering || currentRole === 'Starting Official' || currentRole === 'Finish Line Official'}
                   color={isRegistered ? 'error' : 'primary'}
                 >
                   {registering ? (
                     <CircularProgress size={24} sx={{ color: 'white' }} />
                   ) : isRegistered ? (
                     'Unregister as Runner'
+                  ) : currentRole === 'Starting Official' || currentRole === 'Finish Line Official' ? (
+                    `Registered as ${currentRole}`
                   ) : (
                     'Register as Runner'
                   )}
@@ -682,13 +739,15 @@ const EventDetails = () => {
                   fullWidth
                   sx={{ maxWidth: 400 }}
                   onClick={handleVolunteer}
-                  disabled={volunteering}
+                  disabled={volunteering || currentRole === 'Starting Official' || currentRole === 'Finish Line Official'}
                   color={isVolunteer ? 'error' : 'primary'}
                 >
                   {volunteering ? (
                     <CircularProgress size={24} />
                   ) : isVolunteer ? (
                     'Unregister as Volunteer'
+                  ) : currentRole === 'Starting Official' || currentRole === 'Finish Line Official' ? (
+                    `Registered as ${currentRole}`
                   ) : (
                     'Register as Volunteer'
                   )}
