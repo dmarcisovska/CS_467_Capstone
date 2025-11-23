@@ -14,7 +14,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -287,7 +287,11 @@ const Register = () => {
                 color="text.secondary"
               >
                 Already have an account?{' '}
-                <Button href="/login" sx={{ textTransform: 'none' }}>
+                <Button
+                  component={Link}
+                  to="/login"
+                  sx={{ textTransform: 'none' }}
+                >
                   Log in here
                 </Button>
               </Typography>
