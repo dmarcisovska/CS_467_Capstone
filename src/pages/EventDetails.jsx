@@ -181,13 +181,24 @@ const EventDetails = () => {
         
         // Register as Runner
         await registerForEvent(id, 'Runner');
+        
+        // Update state IMMEDIATELY
         setIsRegistered(true);
         setCurrentRole('Runner');
       }
-      loadEvent();
+      
+      // Only reload event data (participant counts), don't check registration again
+      const data = await fetchEventById(id);
+      setEvent(data);
+      
     } catch (err) {
       console.error('Registration error:', err);
       console.log(err.message);
+      
+      // On error, check actual status from server
+      const registrationStatus = await checkUserRegistration(id);
+      setIsRegistered(registrationStatus.isRunner);
+      setCurrentRole(registrationStatus.currentRole);
     } finally {
       setRegistering(false);
     }
@@ -199,12 +210,15 @@ const EventDetails = () => {
       navigate('/login');
       return;
     }
+    
     setVolunteering(true);
     
     try {
       if (isVolunteer) {
         // Unregister as volunteer
         await unregisterFromEvent(id);
+        
+        // Update state IMMEDIATELY
         setIsVolunteer(false);
         setCurrentRole(null);
       } else {
@@ -223,13 +237,24 @@ const EventDetails = () => {
         
         // Register as Volunteer
         await registerForEvent(id, 'Volunteer');
+        
+        // Update state IMMEDIATELY after successful registration
         setIsVolunteer(true);
         setCurrentRole('Volunteer');
       }
-      loadEvent();
+      
+      // Only reload event data (participant counts), don't check registration again
+      const data = await fetchEventById(id);
+      setEvent(data);
+      
     } catch (err) {
       console.error('Volunteer registration error:', err);
       console.error('Error message:', err.message);
+      
+      // On error, check actual status from server
+      const registrationStatus = await checkUserRegistration(id);
+      setIsVolunteer(registrationStatus.isVolunteer);
+      setCurrentRole(registrationStatus.currentRole);
     } finally {
       setVolunteering(false);
     }
