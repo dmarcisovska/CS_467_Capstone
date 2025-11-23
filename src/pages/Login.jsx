@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 import heroImage from '../assets/nature-run.jpg';
 import { loginUser } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -152,7 +152,8 @@ const Login = () => {
         >
           Don't have an account?{' '}
           <Button 
-            href="/register" 
+            component={Link}
+            to="/register" 
             sx={{ 
               textTransform: 'none', 
               color: 'white',
