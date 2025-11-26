@@ -271,7 +271,7 @@ export const checkUserRegistration = async (eventId) => {
 
     return {
       isRunner: userRegistration?.role === 'Runner',
-      isVolunteer: userRegistration?.role === 'Volunteer',
+      isVolunteer: ['Volunteer', 'Starting Official', 'Finish Line Official'].includes(userRegistration?.role),
       currentRole: userRegistration?.role || null
     };
 
