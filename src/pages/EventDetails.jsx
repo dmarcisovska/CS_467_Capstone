@@ -190,8 +190,21 @@ const loadEvent = async () => {
         await unregisterFromEvent(id);
         setIsRegistered(false);
       } else {
-        // Register
-        await registerForEvent(id);
+        // Check if already registered as volunteer
+        if (isVolunteer) {
+          const confirmSwitch = window.confirm(
+            'You are already registered as a Volunteer/Official. Do you want to switch to Runner instead?'
+          );
+          if (!confirmSwitch) {
+            setRegistering(false);
+            return;
+          }
+          await unregisterFromEvent(id);
+          setIsVolunteer(false);
+        }
+        
+        // Register as runner
+        await registerForEvent(id, 'Runner');
         setIsRegistered(true);
       }
       loadEvent();
@@ -270,29 +283,6 @@ const loadEvent = async () => {
       alert('Failed to delete event: ' + err.message);
       setDeleting(false);
       setDeleteDialogOpen(false);
-    }
-  };
-
-  const checkRegistrationStatus = async () => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return;
-    
-    const user = JSON.parse(storedUser);
-    
-    try {
-      // Fetch all participants
-      const response = await fetch(`${API_BASE_URL}/api/events/${id}/participants`);
-      const data = await response.json();
-      
-      const myRegistration = data.participants?.find(p => p.user_id === user.user_id);
-      
-      if (myRegistration) {
-        alert(`You ARE registered as: ${myRegistration.role}`);
-      } else {
-        alert('You are NOT registered for this event');
-      }
-    } catch (err) {
-      console.error('Check failed:', err);
     }
   };
 
