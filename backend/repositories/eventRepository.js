@@ -29,7 +29,7 @@ export const getEventsRepository = async (filters = {}) => {
   let query = `
     SELECT
       e.*,
-      COUNT(r.user_id) AS participant_count,
+      COUNT(CASE WHEN r.role = 'Runner' THEN 1 END) AS participant_count,
       CASE
         WHEN $1::float IS NOT NULL AND $2::float IS NOT NULL THEN (
           ${EARTH_RADIUS} * acos(
@@ -93,7 +93,7 @@ export const getEventsRepository = async (filters = {}) => {
 
   // added by Brian Can, ensures only events with participants registered >= the minimum participants is returned.
   if (minParticipants) {
-    query += ` HAVING COUNT(r.user_id) >= $${params.length}`;
+    query += ` HAVING COUNT(CASE WHEN r.role = 'Runner' THEN 1 END) >= $${params.length}`;
   }
 
   // sort
