@@ -130,29 +130,32 @@ POST http://localhost:8080/api/user/login
 Content-Type: application/json
 
 {
-  "email": "ha@test2.com",
+  "email": "abctest5@test5.com", 
   "password": "password123"
 }
 
 ### GET Specific user using user_id
-GET http://localhost:8080/api/user/profile/52b96efc-3ce3-455c-aeac-8bd9efdc5b58
+GET http://localhost:8080/api/user/profile/ded77c1e-95db-4c9b-97d4-d1a224a7d8fc
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTJiOTZlZmMtM2NlMy00NTVjLWFlYWMtOGJkOWVmZGM1YjU4IiwiZW1haWwiOiJoYUB0ZXN0Mi5jb20iLCJpYXQiOjE3NjE1NDE1MzcsImV4cCI6MTc2MjE0NjMzN30.TD4W9F2U0urm4WpmwrZN-sMzIgv42oS2zBZ_KqYWNyI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGVkNzdjMWUtOTVkYi00YzliLTk3ZDQtZDFhMjI0YTdkOGZjIiwiZW1haWwiOiJ0ZXN0MkBlbWFpbC5jb20iLCJpYXQiOjE3NjQxNTQ5MTcsImV4cCI6MTc2NDc1OTcxN30.K0dE26dc6PoT_msMAXqKjkUes55NeJL5Gynnp2LPg4o
 
 ### PUT Update password for specific user
-PUT http://localhost:8080/api/user/profile/52b96efc-3ce3-455c-aeac-8bd9efdc5b58
+PUT http://localhost:8080/api/user/profile/ded77c1e-95db-4c9b-97d4-d1a224a7d8fc
 Content-Type: application/json
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTJiOTZlZmMtM2NlMy00NTVjLWFlYWMtOGJkOWVmZGM1YjU4IiwiZW1haWwiOiJoYUB0ZXN0Mi5jb20iLCJpYXQiOjE3NjE1NDE1MzcsImV4cCI6MTc2MjE0NjMzN30.TD4W9F2U0urm4WpmwrZN-sMzIgv42oS2zBZ_KqYWNyI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGVkNzdjMWUtOTVkYi00YzliLTk3ZDQtZDFhMjI0YTdkOGZjIiwiZW1haWwiOiJ0ZXN0MkBlbWFpbC5jb20iLCJpYXQiOjE3NjQxNTQ5MTcsImV4cCI6MTc2NDc1OTcxN30.K0dE26dc6PoT_msMAXqKjkUes55NeJL5Gynnp2LPg4o
 
 {
-  "username": "new_ha_test_2",
-	"password": "newpassword123"
+  "username": "test_2",
+	"password": "password1"
 }
 
-### PUT Delete specific user by setting is_deleted = true
-PUT http://localhost:8080/api/user/profile/delete/25f4c68d-092e-4b53-b70d-15f670a9695e
+### PUT Delete specific user
+DELETE http://localhost:8080/api/user/profile/96048310-43fe-4824-ba4c-00756049a769
+Content-Type: application/json
 Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOTYwNDgzMTAtNDNmZS00ODI0LWJhNGMtMDA3NTYwNDlhNzY5IiwiZW1haWwiOiJhYmN0ZXN0NUB0ZXN0NS5jb20iLCJpYXQiOjE3NjQxNTYxOTcsImV4cCI6MTc2NDc2MDk5N30.BL27e1DNsLXjy-VIc5MTqZcoQKmQ1J8mawzn8b3iv-U
+
 
 ### POST Register for a user
 POST http://localhost:8080/api/user/register 
@@ -160,9 +163,9 @@ Content-Type: application/json
 Accept: application/json 
 
 { 
-  "email": "test5@test5.com", 
+  "email": "abctest5@test5.com", 
   "password": "password123", 
-  "username": "test_5" 
+  "username": "test_5abc" 
 }
 
 ### POST Login with existing user
