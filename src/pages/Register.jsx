@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import CircularProgress from '@mui/material/CircularProgress';
+import { API_BASE_URL } from '../services/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -45,6 +46,8 @@ const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // const [uploading, setUploading] = useState(false);
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -106,10 +109,18 @@ const Register = () => {
         avatar_url: formData.avatarUrl || null,
       };
 
-      console.log('Sending registration data:', userData); // Debug log
-
       const response = await registerUser(userData);
-      console.log('Registration successful:', response);
+
+      // upload avatar after user is created
+      if (selectedAvatarFile && response.user && response.user.user_id) {
+        try {
+          await handleAvatarUpload(selectedAvatarFile, response.user.user_id);
+        } catch (avatarError) {
+          console.error('Avatar upload failed, but registration succeeded:', avatarError);
+        }
+      } else {
+        console.log('Skipping avatar upload - no file selected');
+      }
 
       setSuccess('Registration successful! Redirecting to login...');
 
@@ -124,6 +135,48 @@ const Register = () => {
       setSubmitting(false);
     }
   };
+
+  const handleAvatarUpload = async (file, user_id) => {
+      if (!file) return;
+  
+      if (file.size > 256 * 1024) {
+        alert('Avatar image must be less than 256KB');
+        return;
+      }
+  
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+  
+      // setUploading(true);
+  
+      try {
+        const formData = new FormData();
+        formData.append('profilePicture', file);
+  
+        const uploadUrl = `${API_BASE_URL}/api/profile-picture/${user_id}`;
+        const response = await fetch(uploadUrl, {
+          method: 'PATCH',
+          body: formData,
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to upload avatar');
+        }
+  
+        // const updatedUser = { ...user };
+  
+        // localStorage.setItem('user', JSON.stringify(updatedUser));
+        // setUser(updatedUser);
+        // setAvatarKey(Date.now()); // cache-bust on this page only
+        // window.dispatchEvent(new Event('userLoggedIn'));
+  
+        // alert('Avatar updated successfully!');
+      } catch (error) {
+        alert('Failed to upload avatar: ' + error.message);
+      }
+    };
 
   return (
     <>
@@ -264,7 +317,11 @@ const Register = () => {
                 Upload avatar
                 <VisuallyHiddenInput
                   type="file"
-                  onChange={(event) => console.log(event.target.files)}
+                  onChange={(event) => {
+                    const file = event.target.files[0];
+                    setSelectedAvatarFile(file);
+                  }}
+                  accept='image/*'
                   multiple
                 />
               </Button>
