@@ -13,7 +13,7 @@ function Home() {
     <>
       <Box
         sx={{
-          height: '70vh',
+          minHeight: { xs: '50vh', sm: '60vh', md: '70vh' },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -24,6 +24,7 @@ function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           position: 'relative',
+          zIndex: 1,
         }}
       >
         <Box

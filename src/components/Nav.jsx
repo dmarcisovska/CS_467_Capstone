@@ -100,7 +100,7 @@ function ResponsiveAppBar() {
     : '';
 
   return (
-    <AppBar position="static" color="default">
+    <AppBar position="sticky" color="default" sx={{ top: 0, zIndex: 1300 }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <IconButton
